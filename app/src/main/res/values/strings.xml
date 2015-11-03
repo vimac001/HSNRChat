@@ -1,4 +1,16 @@
 <resources>
     <string name="app_name">HSNRChat</string>
     <string name="action_settings">Settings</string>
+    <string name="siteNav">Seiten Navigation</string>
+    <string name="fb01">01 Chemie</string>
+    <string name="fb02">02 Design</string>
+    <string name="fb03">03 E-Technik/Informatik</string>
+    <string name="fb04">04 Maschinenbau</string>
+    <string name="fb05">05 Oecotrophologie</string>
+    <string name="fb06">06 Sozialwesen</string>
+    <string name="fb07">07 Textil-/Bekleidugnstechnik</string>
+    <string name="fb08">08 Wirtschaftswissenschaften</string>
+    <string name="fb09">09 Wirtschaftsingeneurwesen</string>
+    <string name="fb10">10 Gesundheitswesen</string>
+
 </resources>
