@@ -8,36 +8,65 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private List<String> facData = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+
+        populateFACData();
+        populateFACListView();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    private void populateFACData() {
+        facData.add("Chemie");
+        facData.add("Design");
+        facData.add("Elektrotechnik/Informatik");
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    private void populateFACListView() {
+        ArrayAdapter<String> facAdapter = new FACListAdapter();
+        ListView listView_main = (ListView)findViewById(R.id.listView_main);
+        listView_main.setAdapter(facAdapter);
+    }
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+
+
+    private class FACListAdapter extends ArrayAdapter<String>
+    {
+
+        public FACListAdapter() {
+            super(MainActivity.this, R.layout.item_layout, facData);
         }
 
-        return super.onOptionsItemSelected(item);
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View itemView = convertView;
+            if(itemView == null)
+                itemView = getLayoutInflater().inflate(R.layout.item_layout, parent, false);
+
+            String currentFAC = facData.get(position);
+
+            TextView textLayout = (TextView)itemView.findViewById(R.id.item_text);
+            textLayout.setText(currentFAC);
+
+            return itemView;
+        }
+
+
     }
+
+
+
+
 }
