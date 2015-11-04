@@ -16,7 +16,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.hs_niederrhein.chat.hsnrchat.net.Talker;
+
 public class MainActivity extends AppCompatActivity {
+    private Talker talker;
+
     private List<String> facData = new ArrayList<String>();
 
     @Override
@@ -26,6 +30,12 @@ public class MainActivity extends AppCompatActivity {
 
         populateFACData();
         populateFACListView();
+
+        try {
+            talker = new Talker();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void populateFACData() {
