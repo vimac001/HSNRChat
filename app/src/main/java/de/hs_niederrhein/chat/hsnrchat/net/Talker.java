@@ -7,7 +7,9 @@ import java.lang.Thread;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class Talker {
 
@@ -19,12 +21,14 @@ public class Talker {
     private InputStream in;
 
 
-    public static final String Host = "127.0.0.1";
+    public static final String Host = "192.168.2.113";
     public static final int Port = 1337;
 
     public Talker() {
         try {
-            client = new Socket(Host, Port);
+            InetAddress addr = InetAddress.getByName(Host);
+
+            client = new Socket(addr, Port);
             if(client.isConnected())
             {
                 Log.d("Talking", "Connected");
@@ -37,6 +41,8 @@ public class Talker {
                 tListener.start();
             }
 
+        }  catch (UnknownHostException e1) {
+            e1.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

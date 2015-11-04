@@ -24,9 +24,10 @@ public class Listener implements Runnable {
     public void run() {
         byte[] buffer = new byte[1024];
         try {
-            String msg = reader.readLine();
-            Log.d("DataRec", msg);
-
+            while (!Thread.currentThread().isInterrupted()) {
+                String msg = reader.readLine();
+                Log.d("DataRec", msg);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

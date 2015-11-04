@@ -19,6 +19,7 @@ import java.util.List;
 import de.hs_niederrhein.chat.hsnrchat.net.Talker;
 
 public class MainActivity extends AppCompatActivity {
+    private Thread tTalker;
     private Talker talker;
 
     private List<String> facData = new ArrayList<String>();
@@ -31,8 +32,19 @@ public class MainActivity extends AppCompatActivity {
         populateFACData();
         populateFACListView();
 
+        openSocketConnection();
+    }
+
+    private void openSocketConnection() {
         try {
-            talker = new Talker();
+            tTalker = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    talker = new Talker();
+                }
+            });
+
+            tTalker.start();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
