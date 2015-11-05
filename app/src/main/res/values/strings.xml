@@ -12,5 +12,6 @@
     <string name="fb08">08 Wirtschaftswissenschaften</string>
     <string name="fb09">09 Wirtschaftsingeneurwesen</string>
     <string name="fb10">10 Gesundheitswesen</string>
+    <string name="title_activity_detail">DetailActivity</string>
 
 </resources>

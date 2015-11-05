@@ -1,5 +1,6 @@
 package de.hs_niederrhein.chat.hsnrchat;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -9,13 +10,16 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import de.hs_niederrhein.chat.hsnrchat.db.DatabaseOpenHelper;
 import de.hs_niederrhein.chat.hsnrchat.net.Talker;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private Talker talker;
 
     private List<String> facData = new ArrayList<String>();
+    private DatabaseOpenHelper db = new DatabaseOpenHelper(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +36,31 @@ public class MainActivity extends AppCompatActivity {
 
         populateFACData();
         populateFACListView();
+        registerClick();
+        db.insertTestData();
 
         openSocketConnection();
+
+
+    }
+
+    private void registerClick() {
+        ListView facList = (ListView)findViewById(R.id.listView_main);
+        facList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                startDetailActivity(position);
+
+
+            }
+        });
+    }
+
+    private void startDetailActivity(int position) {
+        System.out.println("Position:" + position);
+        Intent changeToDetailView = new Intent(this, DetailActivity.class);
+        changeToDetailView.putExtra("facNummer", ++position);
+        startActivity(changeToDetailView);
     }
 
     private void openSocketConnection() {
@@ -53,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
     private void populateFACData() {
         facData.add("Chemie");
         facData.add("Design");
-        facData.add("Elektrotechnik/Informatik");
+        facData.add("Elektrotechnik & Informatik");
     }
 
     private void populateFACListView() {
