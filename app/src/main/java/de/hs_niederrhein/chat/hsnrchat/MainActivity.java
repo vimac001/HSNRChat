@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private Thread tTalker;
     private Talker talker;
 
-    private List<String> facData = new ArrayList<String>();
+    private List<String> facData = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         facData.add("Chemie");
         facData.add("Design");
         facData.add("Elektrotechnik/Informatik");
+        facData.add("Coole Kids nutzen SQLIte");
     }
 
     private void populateFACListView() {
