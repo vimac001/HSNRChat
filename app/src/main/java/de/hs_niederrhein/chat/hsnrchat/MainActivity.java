@@ -1,6 +1,8 @@
 package de.hs_niederrhein.chat.hsnrchat;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -79,10 +81,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void populateFACData() {
-        facData.add("Chemie");
-        facData.add("Design");
-        facData.add("Elektrotechnik/Informatik");
-        facData.add("Coole Kids nutzen SQLIte");
+        SQLiteDatabase read = db.getReadableDatabase();
+        Cursor c = read.query("faculties", new String[]{"facName"},null,null,null,null,null);
+        while(c.moveToNext()){
+            facData.add(c.getString(c.getColumnIndex("facName")));
+        }
+
     }
 
     private void populateFACListView() {

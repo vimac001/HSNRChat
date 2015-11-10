@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by Jennifer on 05.11.2015.
  */
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "facDB";
+    private static final String DATABASE_NAME = "db";
     private static final int DATABASE_VERSION = 1;
 
     public DatabaseOpenHelper(Context context) {
@@ -24,7 +24,42 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
                 "facName TEXT," +
                 "facNumberOfSemester INTEGER," +
                 "facType TEXT);");
+        db.execSQL("CREATE TABLE faculties(" +
+                "facNummer INTEGER PRIMARY KEY," +
+                "facName TEXT);");
 
+        insertFaculties();
+
+    }
+
+    public void insertFaculties() {
+        insertFacultyIntoTable(1,"Chemie");
+        insertFacultyIntoTable(2,"Design");
+        insertFacultyIntoTable(3,"Elektrotechnik & Informatik");
+        insertFacultyIntoTable(4,"Maschinenbau & Verfahrenstechnik");
+        insertFacultyIntoTable(5, "Oecotrophologie");
+        insertFacultyIntoTable(6,"Sozialwesen");
+        insertFacultyIntoTable(7,"Textil-/Bekleidungstechnik");
+        insertFacultyIntoTable(8,"Wirtschaftswissenschaften");
+        insertFacultyIntoTable(9, "Wirtschaftsingenieurwesen");
+        insertFacultyIntoTable(10, "Gesundheitswesen");
+
+    }
+
+    private long insertFacultyIntoTable(int facNummer, String facName){
+        long rowid = -1;
+        try{
+            SQLiteDatabase db = getWritableDatabase();
+            ContentValues values = new ContentValues();
+            values.put("facNummer", facNummer);
+            values.put("facName", facName);
+            rowid = db.insertWithOnConflict("faculties", null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            System.out.println("Hinzugefügt: " + rowid);
+        }catch(Exception e){
+            e.getCause();
+        }
+
+        return rowid;
     }
 
     @Override
@@ -32,53 +67,28 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
         //wenn sich die Version der Datenbank ändert
     }
 
-    public void insertTestData() {
+
+    private long insertIntoTable(int facID, int facNummer, String facName, int facNumberOfSemester, String type){
         long rowid = -1;
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("facID", 1);
-        values.put("facNummer", 1);
-        values.put("facName", "Chemieingenieurwesen");
-        values.put("facNumberOfSemester", 6);
-        values.put("facType", "Bachelor");
+        values.put("facID", facID);
+        values.put("facNummer", facNummer);
+        values.put("facName", facName);
+        values.put("facNumberOfSemester", facNumberOfSemester);
+        values.put("facType", type);
         rowid= db.insertWithOnConflict("facData", null, values,SQLiteDatabase.CONFLICT_REPLACE);
-        System.out.println("Eintrag wurde eingefügt:" + rowid);
+        System.out.println("Hinzugefügt: " + rowid);
+        return rowid;
+    }
 
-        values.clear();
-        values.put("facID", 2);
-        values.put("facNummer", 1);
-        values.put("facName", "Chemie und Biotechnologie");
-        values.put("facNumberOfSemester", 6);
-        values.put("facType", "Bachelor");
-        rowid= db.insertWithOnConflict("facData", null, values,SQLiteDatabase.CONFLICT_REPLACE);
-        System.out.println("Eintrag wurde eingefügt:" + rowid);
+    public void insertTestData() {
+        insertIntoTable(1, 1, "Chemieingenieurwesen", 6, "Bachelor");
+        insertIntoTable(2, 1, "Chemie und Biotechnologie", 6, "Bachelor");
+        insertIntoTable(3, 2, "Design", 7, "Bachelor");
+        insertIntoTable(4, 3, "Elektrotechnik", 7, "Bachelor");
+        insertIntoTable(5,3,"Informatik", 6,"Bachelor");
 
-        values.clear();
-        values.put("facID", 3);
-        values.put("facNummer", 2);
-        values.put("facName", "Design");
-        values.put("facNumberOfSemester", 7);
-        values.put("facType", "Bachelor");
-        rowid= db.insertWithOnConflict("facData", null, values,SQLiteDatabase.CONFLICT_REPLACE);
-        System.out.println("Eintrag wurde eingefügt:" + rowid);
-
-        values.clear();
-        values.put("facID", 4);
-        values.put("facNummer", 3);
-        values.put("facName", "Elektrotechnik");
-        values.put("facNumberOfSemester", 7);
-        values.put("facType", "Bachelor");
-        rowid= db.insertWithOnConflict("facData", null, values,SQLiteDatabase.CONFLICT_REPLACE);
-        System.out.println("Eintrag wurde eingefügt:" + rowid);
-
-        values.clear();
-        values.put("facID", 5);
-        values.put("facNummer", 3);
-        values.put("facName", "Informatik");
-        values.put("facNumberOfSemester", 6);
-        values.put("facType", "Bachelor");
-        rowid= db.insertWithOnConflict("facData", null, values,SQLiteDatabase.CONFLICT_REPLACE);
-        System.out.println("Eintrag wurde eingefügt:" + rowid);
 
 
 
