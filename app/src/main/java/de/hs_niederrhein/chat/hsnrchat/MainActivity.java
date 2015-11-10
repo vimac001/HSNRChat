@@ -25,9 +25,9 @@ import de.hs_niederrhein.chat.hsnrchat.net.Talker;
 public class MainActivity extends AppCompatActivity {
     private Thread tTalker;
     private Talker talker;
-
-    private List<String> facData = new ArrayList<String>();
+    
     private DatabaseOpenHelper db = new DatabaseOpenHelper(this);
+    private List<String> facData = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +81,8 @@ public class MainActivity extends AppCompatActivity {
     private void populateFACData() {
         facData.add("Chemie");
         facData.add("Design");
-        facData.add("Elektrotechnik & Informatik");
+        facData.add("Elektrotechnik/Informatik");
+        facData.add("Coole Kids nutzen SQLIte");
     }
 
     private void populateFACListView() {
