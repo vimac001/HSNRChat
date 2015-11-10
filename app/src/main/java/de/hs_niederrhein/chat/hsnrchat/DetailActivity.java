@@ -10,7 +10,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -35,8 +37,24 @@ public class DetailActivity extends AppCompatActivity {
             System.out.println("Extra: " + facNummer);
             populateDetailData(facNummer);
             populateDetailListView();
-
         }
+
+        registerClick();
+
+    }
+
+    private void registerClick() {
+        ListView detailList = (ListView)findViewById(R.id.listView_detail);
+        detailList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                startSemesterActivity(position);
+            }
+        });
+    }
+
+    private void startSemesterActivity(int id) {
+        //hier muss weiter implementiert werden
 
     }
 
