@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,23 +24,27 @@ import java.util.List;
 
 import de.hs_niederrhein.chat.hsnrchat.db.DatabaseOpenHelper;
 import de.hs_niederrhein.chat.hsnrchat.net.Talker;
+import de.hs_niederrhein.chat.hsnrchat.types.Faculty;
 
 public class MainActivity extends AppCompatActivity {
     private Thread tTalker;
     private Talker talker;
     
     private DatabaseOpenHelper db = new DatabaseOpenHelper(this);
-    private List<String> facData = new ArrayList<>();
+    private List<Faculty> facData = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        db.insertFaculties();
+        db.insertTestData();
+
         populateFACData();
         populateFACListView();
         registerClick();
-        db.insertTestData();
+
 
         openSocketConnection();
 
@@ -81,22 +86,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void populateFACData() {
         SQLiteDatabase read = db.getReadableDatabase();
-        Cursor c = read.query("faculties", new String[]{"facName"},null,null,null,null,null);
+        Cursor c = read.query("faculties", new String[]{"facNummer","facName","facIcon"},null,null,null,null,null);
         while(c.moveToNext()){
-            facData.add(c.getString(c.getColumnIndex("facName")));
+            facData.add(new Faculty(c.getInt(c.getColumnIndex("facNummer")),c.getString(c.getColumnIndex("facName")),c.getInt(c.getColumnIndex("facIcon"))));
         }
 
     }
 
     private void populateFACListView() {
-        ArrayAdapter<String> facAdapter = new FACListAdapter();
+        ArrayAdapter<Faculty> facAdapter = new FACListAdapter();
         ListView listView_main = (ListView)findViewById(R.id.listView_main);
         listView_main.setAdapter(facAdapter);
     }
 
 
 
-    private class FACListAdapter extends ArrayAdapter<String>
+    private class FACListAdapter extends ArrayAdapter<Faculty>
     {
 
         public FACListAdapter() {
@@ -109,10 +114,13 @@ public class MainActivity extends AppCompatActivity {
             if(itemView == null)
                 itemView = getLayoutInflater().inflate(R.layout.item_layout, parent, false);
 
-            String currentFAC = facData.get(position);
+            Faculty currentFAC = facData.get(position);
 
             TextView textLayout = (TextView)itemView.findViewById(R.id.item_text);
-            textLayout.setText(currentFAC);
+            textLayout.setText(currentFAC.getFacName());
+
+            ImageView imageView = (ImageView)itemView.findViewById(R.id.item_icon);
+            imageView.setImageResource(currentFAC.getFacIcon());
 
             return itemView;
         }

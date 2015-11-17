@@ -20,9 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.hs_niederrhein.chat.hsnrchat.db.DatabaseOpenHelper;
+import de.hs_niederrhein.chat.hsnrchat.types.Faculty;
 
 public class DetailActivity extends AppCompatActivity {
-    private List<String> facNames = new ArrayList<String>();
+    private List<Faculty> faculties = new ArrayList<Faculty>();
     private DatabaseOpenHelper db = new DatabaseOpenHelper(this);
     private int facNummer;
 
@@ -53,13 +54,17 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
-    private void startSemesterActivity(int id) {
-        //hier muss weiter implementiert werden
+    private void startSemesterActivity(int position) {
+        Faculty clickedFAC = faculties.get(position);
+        Intent changeToChatActivity = new Intent(this,ChatActivity.class);
+        changeToChatActivity.putExtra("facID", clickedFAC.getFacID());
+        startActivity(changeToChatActivity);
+
 
     }
 
     private void populateDetailListView() {
-        ArrayAdapter<String> facAdapter = new FACListAdapter();
+        ArrayAdapter<Faculty> facAdapter = new FACListAdapter();
         ListView listView_main = (ListView) findViewById(R.id.listView_detail);
         listView_main.setAdapter(facAdapter);
     }
@@ -67,18 +72,27 @@ public class DetailActivity extends AppCompatActivity {
     private void populateDetailData(int facNummer) {
         SQLiteDatabase read = db.getReadableDatabase();
         String whereClause = "facNummer = " + facNummer;
-        Cursor c = read.query("facData", new String[]{"facName"}, whereClause, null, null, null, null);
+        Cursor c = read.query("facData", new String[]{"facID","facName"}, whereClause, null, null, null, null);
         while (c.moveToNext()) {
             System.out.println("DB: " + c.getString(c.getColumnIndex("facName")));
-            facNames.add(c.getString(c.getColumnIndex("facName")));
+            faculties.add(new Faculty(c.getInt(c.getColumnIndex("facID")),c.getString(c.getColumnIndex("facName"))));
+        }
+        changeIfThereIsOnlyOneEntry();
+    }
+
+    private void changeIfThereIsOnlyOneEntry() {
+        if(faculties.size() == 1){
+            Intent changeToChatActivity = new Intent(this,ChatActivity.class);
+            changeToChatActivity.putExtra("facID", faculties.get(0).getFacID());
+            startActivity(changeToChatActivity);
         }
     }
 
 
-    private class FACListAdapter extends ArrayAdapter<String> {
+    private class FACListAdapter extends ArrayAdapter<Faculty> {
 
         public FACListAdapter() {
-            super(DetailActivity.this, R.layout.item_layout, facNames);
+            super(DetailActivity.this, R.layout.item_layout, faculties);
         }
 
         @Override
@@ -87,10 +101,10 @@ public class DetailActivity extends AppCompatActivity {
             if (itemView == null)
                 itemView = getLayoutInflater().inflate(R.layout.item_layout, parent, false);
 
-            String currentFAC = facNames.get(position);
+            Faculty currentFAC = faculties.get(position);
 
             TextView textLayout = (TextView) itemView.findViewById(R.id.item_text);
-            textLayout.setText(currentFAC);
+            textLayout.setText(currentFAC.getFacName());
 
             return itemView;
         }

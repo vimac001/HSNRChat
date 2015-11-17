@@ -14,5 +14,6 @@
     <string name="fb10">10 Gesundheitswesen</string>
     <string name="title_activity_detail">DetailActivity</string>
     <string name="title_activity_semester">SemesterActivity</string>
+    <string name="title_activity_chat">ChatActivity</string>
 
 </resources>
