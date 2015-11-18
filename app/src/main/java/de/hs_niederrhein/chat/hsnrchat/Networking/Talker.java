@@ -1,4 +1,4 @@
-package de.hs_niederrhein.chat.hsnrchat.net;
+package de.hs_niederrhein.chat.hsnrchat.Networking;
 
 import android.util.Log;
 
