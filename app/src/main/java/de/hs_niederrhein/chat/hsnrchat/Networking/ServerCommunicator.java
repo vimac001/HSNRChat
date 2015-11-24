@@ -1,29 +1,114 @@
 package de.hs_niederrhein.chat.hsnrchat.Networking;
 
 
+import android.util.Log;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.InvalidSSIDException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.RoomNotFoundException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ServerErrorException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.UserNotFoundException;
 
-public abstract class ServerCommunicator {
+public abstract class ServerCommunicator implements Runnable {
+
+    public static final String DefaultHost = "192.168.2.113";
+    public static final int DefaultPort = 1337;
+
+    private static final int DefaulBufferSize = 256;
+
+    private Thread listener;
+
+    private Socket client;
+    private InetAddress addr;
+
+    private OutputStream out;
+    private InputStream in;
+
+    private InputStreamReader inReader;
+    private BufferedReader reader;
 
     protected long ssid = 0;
-    protected Listener listener;
 
-    public ServerCommunicator(Listener listener) {
-        this.listener = listener;
+    /**
+     * Initialisiert ein neues ServerCommunicator Objekt.
+     * Baut auch eine neue Verbindung zum Server auf.
+     * @param host Die Host Domain-/IP-Addresse, mit der sich der Communicator verbinden soll.
+     * @param port Der TCP/IP Port, auf dem die Verbindung aufgebaut werden soll.
+     * @throws UnknownHostException
+     * @throws IOException
+     */
+    public ServerCommunicator(String host, int port) throws UnknownHostException, IOException {
+        this.addr = InetAddress.getByName(host);
+        client = new Socket(this.addr, port);
+
+        if(this.client.isConnected()) {
+            this.out = client.getOutputStream();
+            this.in = client.getInputStream();
+
+            this.inReader = new InputStreamReader(this.in);
+            this.reader = new BufferedReader(this.inReader);
+
+            this.listener = new Thread(this);
+            //this.listener.start();
+        }
+    }
+
+    @Override
+    public void run() {
+        byte[] buffer = new byte[DefaulBufferSize];
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
+                this.in.read(buffer, 0, 1);
+                if(buffer[0] >= 100) {
+                    //TODO: Fnc call
+                } else {
+                    Response rsp = new Response(ServerFunction.fromByte(buffer[0]), this.in);
+                    if(rsp.isValid()) {
+                        //TODO: Add response to special mega super duper responses list.
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Return true, if the SSID is set.
+     * @return
+     */
+    public boolean isAuthenticated() {
+        return (this.ssid > 0);
     }
 
     /**
      * Authentifiziert den Benutzer und speichert seine SSID.
+     * Sollte der Benutzer bereits authentifiziert sein, wird er abgemeldet und neu angemeldet.
      * @param user Benutzername
      * @param pass Kennwort
      * @throws ServerErrorException
      * @throws UserNotFoundException
      */
-    public void login(String user, String pass) throws ServerErrorException, UserNotFoundException
+    public void login(String user, String pass) throws ServerErrorException, UserNotFoundException, IOException
     {
+        if(this.isAuthenticated()) {
+            this.logout();
+        }
+
+        Request rq = new Request(ServerFunction.Login);
+        rq.addArgValue(user);
+        rq.addArgValue(pass);
+
+        out.write(rq.getBytes());
 
     }
 
