@@ -88,18 +88,18 @@ public class DetailActivity extends AppCompatActivity {
     private class FACListAdapter extends ArrayAdapter<Faculty> {
 
         public FACListAdapter() {
-            super(DetailActivity.this, R.layout.item_layout, faculties);
+            super(DetailActivity.this, R.layout.listing_layout, faculties);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent){
             View itemView = convertView;
             if (itemView == null)
-                itemView = getLayoutInflater().inflate(R.layout.item_layout, parent, false);
+                itemView = getLayoutInflater().inflate(R.layout.listing_layout, parent, false);
 
             Faculty currentFAC = faculties.get(position);
 
-            TextView textLayout = (TextView) itemView.findViewById(R.id.item_text);
+            TextView textLayout = (TextView) itemView.findViewById(R.id.idText);
             textLayout.setText(currentFAC.getFacName());
 
             return itemView;
