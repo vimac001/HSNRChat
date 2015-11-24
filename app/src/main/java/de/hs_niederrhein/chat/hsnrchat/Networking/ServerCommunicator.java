@@ -9,6 +9,11 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.UserNotFoundExceptio
 public abstract class ServerCommunicator {
 
     protected long ssid = 0;
+    protected Listener listener;
+
+    public ServerCommunicator(Listener listener) {
+        this.listener = listener;
+    }
 
     /**
      * Authentifiziert den Benutzer und speichert seine SSID.
@@ -17,7 +22,7 @@ public abstract class ServerCommunicator {
      * @throws ServerErrorException
      * @throws UserNotFoundException
      */
-    protected void login(String user, String pass) throws ServerErrorException, UserNotFoundException
+    public void login(String user, String pass) throws ServerErrorException, UserNotFoundException
     {
 
     }
@@ -25,7 +30,7 @@ public abstract class ServerCommunicator {
     /**
      * Meldet den Benutzer ab.
      */
-    protected void logout() {
+    public void logout() {
         this.ssid = 0;
 
     }
@@ -35,7 +40,7 @@ public abstract class ServerCommunicator {
      * @return Aktuelle SSID
      * @throws InvalidSSIDException
      */
-    protected long getSSID() throws InvalidSSIDException {
+    public long getSSID() throws InvalidSSIDException {
         if(this.ssid == 0)
             throw new InvalidSSIDException();
 
@@ -50,7 +55,7 @@ public abstract class ServerCommunicator {
      * @throws InvalidSSIDException
      * @throws UserNotFoundException
      */
-    protected void sendMessage(long userId, String message) throws ServerErrorException, InvalidSSIDException, UserNotFoundException
+    public void sendMessage(long userId, String message) throws ServerErrorException, InvalidSSIDException, UserNotFoundException
     {
 
     }
@@ -63,7 +68,7 @@ public abstract class ServerCommunicator {
      * @throws RoomNotFoundException
      * @throws InvalidSSIDException
      */
-    protected void sendMessage(short roomId, String message) throws ServerErrorException, RoomNotFoundException, InvalidSSIDException
+    public void sendMessage(short roomId, String message) throws ServerErrorException, RoomNotFoundException, InvalidSSIDException
     {
 
     }
@@ -76,7 +81,7 @@ public abstract class ServerCommunicator {
      * @throws InvalidSSIDException
      * @throws UserNotFoundException
      */
-    protected User resolveUser(long userId) throws ServerErrorException, InvalidSSIDException, UserNotFoundException
+    public User resolveUser(long userId) throws ServerErrorException, InvalidSSIDException, UserNotFoundException
     {
         return null;
     }
@@ -86,7 +91,7 @@ public abstract class ServerCommunicator {
      * @param userId Die Id des Absenders.
      * @param message Die Nachricht.
      */
-    protected abstract void onNewMessage(long userId, String message);
+    public abstract void onNewMessage(long userId, String message);
 
     /**
      * Wird bei einer neuen Nachricht aufgerufen.
@@ -94,5 +99,5 @@ public abstract class ServerCommunicator {
      * @param roomId Die Id des Raums, an den die Nachricht gesendet wurde.
      * @param message Die Nachricht.
      */
-    protected abstract void onNewMessage(long userId, short roomId, String message);
+    public abstract void onNewMessage(long userId, short roomId, String message);
 }
