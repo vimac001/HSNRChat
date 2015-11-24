@@ -3,6 +3,7 @@ package de.hs_niederrhein.chat.hsnrchat;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.InvalidSSIDException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ServerErrorException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.UserNotFoundException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Listener;
 import de.hs_niederrhein.chat.hsnrchat.Networking.ServerCommunicator;
 import de.hs_niederrhein.chat.hsnrchat.Networking.User;
 
@@ -10,7 +11,9 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.User;
 public class CommunicatorExample extends ServerCommunicator {
 
 
-    public CommunicatorExample() {
+    public CommunicatorExample(Listener listener) {
+        super(listener);
+
         try {
             login("root", "toor");
         } catch (ServerErrorException e) {
@@ -21,7 +24,7 @@ public class CommunicatorExample extends ServerCommunicator {
     }
 
     @Override
-    protected void onNewMessage(long userId, String message) {
+    public void onNewMessage(long userId, String message) {
         try {
             User user = resolveUser(userId);
             //Work with User
@@ -36,7 +39,7 @@ public class CommunicatorExample extends ServerCommunicator {
     }
 
     @Override
-    protected void onNewMessage(long userId, short roomId, String message) {
+    public void onNewMessage(long userId, short roomId, String message) {
 
     }
 
