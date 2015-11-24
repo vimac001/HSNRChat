@@ -16,9 +16,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.hs_niederrhein.chat.hsnrchat.db.DatabaseOpenHelper;
+import de.hs_niederrhein.chat.hsnrchat.Database.DatabaseOpenHelper;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Talker;
-import de.hs_niederrhein.chat.hsnrchat.types.Faculty;
+import de.hs_niederrhein.chat.hsnrchat.Type.Faculty;
 
 public class MainActivity extends AppCompatActivity {
     private Thread tTalker;
@@ -99,14 +99,14 @@ public class MainActivity extends AppCompatActivity {
     {
 
         public FACListAdapter() {
-            super(MainActivity.this, R.layout.item_layout, facData);
+            super(MainActivity.this, R.layout.fac_layout, facData);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View itemView = convertView;
             if(itemView == null)
-                itemView = getLayoutInflater().inflate(R.layout.item_layout, parent, false);
+                itemView = getLayoutInflater().inflate(R.layout.fac_layout, parent, false);
 
             Faculty currentFAC = facData.get(position);
 

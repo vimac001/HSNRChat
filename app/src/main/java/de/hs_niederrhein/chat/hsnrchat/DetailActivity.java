@@ -4,23 +4,19 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import de.hs_niederrhein.chat.hsnrchat.db.DatabaseOpenHelper;
-import de.hs_niederrhein.chat.hsnrchat.types.Faculty;
+import de.hs_niederrhein.chat.hsnrchat.Database.DatabaseOpenHelper;
+import de.hs_niederrhein.chat.hsnrchat.Type.Faculty;
 
 public class DetailActivity extends AppCompatActivity {
     private List<Faculty> faculties = new ArrayList<Faculty>();
@@ -92,18 +88,18 @@ public class DetailActivity extends AppCompatActivity {
     private class FACListAdapter extends ArrayAdapter<Faculty> {
 
         public FACListAdapter() {
-            super(DetailActivity.this, R.layout.item_layout, faculties);
+            super(DetailActivity.this, R.layout.listing_layout, faculties);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent){
             View itemView = convertView;
             if (itemView == null)
-                itemView = getLayoutInflater().inflate(R.layout.item_layout, parent, false);
+                itemView = getLayoutInflater().inflate(R.layout.listing_layout, parent, false);
 
             Faculty currentFAC = faculties.get(position);
 
-            TextView textLayout = (TextView) itemView.findViewById(R.id.item_text);
+            TextView textLayout = (TextView) itemView.findViewById(R.id.idText);
             textLayout.setText(currentFAC.getFacName());
 
             return itemView;
