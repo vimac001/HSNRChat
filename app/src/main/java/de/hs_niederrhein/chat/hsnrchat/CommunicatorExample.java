@@ -1,9 +1,11 @@
 package de.hs_niederrhein.chat.hsnrchat;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.InvalidSSIDException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ServerErrorException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.UserNotFoundException;
-import de.hs_niederrhein.chat.hsnrchat.Networking.Listener;
 import de.hs_niederrhein.chat.hsnrchat.Networking.ServerCommunicator;
 import de.hs_niederrhein.chat.hsnrchat.Networking.User;
 
@@ -11,8 +13,8 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.User;
 public class CommunicatorExample extends ServerCommunicator {
 
 
-    public CommunicatorExample(Listener listener) {
-        super(listener);
+    public CommunicatorExample(String host, int port) throws UnknownHostException, IOException {
+        super(host, port);
 
         try {
             login("root", "toor");
