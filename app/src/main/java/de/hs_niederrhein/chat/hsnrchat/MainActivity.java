@@ -21,9 +21,6 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Talker;
 import de.hs_niederrhein.chat.hsnrchat.Type.Faculty;
 
 public class MainActivity extends AppCompatActivity {
-    private Thread tTalker;
-    private Talker talker;
-    
     private DatabaseOpenHelper db = new DatabaseOpenHelper(this);
     private List<Faculty> facData = new ArrayList<>();
 
@@ -38,11 +35,6 @@ public class MainActivity extends AppCompatActivity {
         populateFACData();
         populateFACListView();
         registerClick();
-
-
-        openSocketConnection();
-
-
     }
 
     private void registerClick() {
@@ -61,21 +53,6 @@ public class MainActivity extends AppCompatActivity {
         Intent changeToDetailView = new Intent(this, DetailActivity.class);
         changeToDetailView.putExtra("facNummer", ++position);
         startActivity(changeToDetailView);
-    }
-
-    private void openSocketConnection() {
-        try {
-            tTalker = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    talker = new Talker();
-                }
-            });
-
-            tTalker.start();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
     private void populateFACData() {
