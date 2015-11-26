@@ -20,7 +20,9 @@ public class Request {
     }
 
     public void addArgValue(String str) {
-        this.addArgValue(str.getBytes(Charset.defaultCharset()));
+        byte[] data = str.getBytes(Charset.defaultCharset());
+        this.addArgValue(data.length);
+        this.addArgValue(data);
     }
 
     public void addArgValue(byte bt) {

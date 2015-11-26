@@ -1,14 +1,15 @@
 package de.hs_niederrhein.chat.hsnrchat.Networking;
 
-public class User {
+import java.io.IOException;
+import java.io.InputStream;
+
+public class User extends NetworkObject {
     protected long Id;
     protected String user;
     protected String nick;
 
-    public User(long id) {
-        this.Id = id;
-        this.user = "testUser";
-        this.nick = "Nick Name";
+    public User(InputStream in) throws IOException {
+        super(in);
     }
 
     public long getId() {
@@ -21,5 +22,12 @@ public class User {
 
     public String getDisplayName() {
         return this.nick;
+    }
+
+    @Override
+    protected void readSelf() throws IOException {
+        this.Id = this.readLong();
+        this.user = this.readString();
+        this.nick = this.readString();
     }
 }

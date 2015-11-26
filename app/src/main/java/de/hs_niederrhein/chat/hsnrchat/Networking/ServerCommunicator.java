@@ -12,7 +12,14 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ClientErrorException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ClientNotAutheticatedException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ConnectionTimeoutException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.InvalidResponseStatusException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.InvalidSSIDException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.RoomNotFoundException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ServerErrorException;
@@ -23,7 +30,10 @@ public abstract class ServerCommunicator implements Runnable {
     public static final String DefaultHost = "192.168.2.113";
     public static final int DefaultPort = 1337;
 
-    private static final int DefaulBufferSize = 256;
+    /**
+     * Die Wartezeit auf eine Antwort vom Server (in Sekunden).
+     */
+    protected int ResponseWaitingTime = 15;
 
     private Thread listener;
 
@@ -36,7 +46,79 @@ public abstract class ServerCommunicator implements Runnable {
     private InputStreamReader inReader;
     private BufferedReader reader;
 
-    protected long ssid = 0;
+    private Semaphore reading = new Semaphore(-1, false);
+
+    private boolean isWaitingForLoginResponse = false;
+    private Semaphore allowLoginResponse = new Semaphore(-1, false);
+
+    private boolean isWaitingForResolveUserResponse = false;
+    private Semaphore allowResolveUserResponse = new Semaphore(-1, false);
+
+    private boolean isWaitingForSendAResponse = false;
+    private Semaphore allowSendAResponse = new Semaphore(-1, false);
+
+    private boolean isWaitingForSendBResponse = false;
+    private Semaphore allowSendBResponse = new Semaphore(-1, false);
+
+    private byte readByte() throws IOException {
+        byte[] buffer = new byte[1];
+        this.in.read(buffer, 0, 1);
+
+        return buffer[0];
+    }
+
+    private short readShort() throws IOException {
+        byte[] buffer = new byte[Short.SIZE];
+        this.in.read(buffer, 0, Short.SIZE);
+
+        short data = buffer[Short.SIZE - 1];
+        for(int i = Short.SIZE - 2; i >= 0; i--) {
+            data <<= Byte.SIZE;
+            data |= buffer[i];
+        }
+
+        return data;
+    }
+
+    private int readInt() throws IOException {
+        byte[] buffer = new byte[Integer.SIZE];
+        this.in.read(buffer, 0, Integer.SIZE);
+
+        int data = buffer[Integer.SIZE - 1];
+        for(int i = Integer.SIZE - 2; i >= 0; i--) {
+            data <<= Byte.SIZE;
+            data |= buffer[i];
+        }
+
+        return data;
+    }
+
+    private long readLong() throws IOException {
+        byte[] buffer = new byte[Long.SIZE];
+        this.in.read(buffer, 0, Long.SIZE);
+
+        long data = buffer[Long.SIZE - 1];
+        for(int i = Long.SIZE - 2; i >= 0; i--) {
+            data <<= Byte.SIZE;
+            data |= buffer[i];
+        }
+
+        return data;
+    }
+
+    private String readString() throws IOException {
+        int bytesCount = this.readInt();
+        byte[] buffer = new byte[bytesCount];
+        this.in.read(buffer, 0, bytesCount);
+
+        return new String(buffer, Charset.defaultCharset());
+    }
+
+    private ResponseStatus readStatus() throws IOException {
+        return ResponseStatus.fromByte(this.readByte());
+    }
+
+    private long ssid = 0;
 
     /**
      * Initialisiert ein neues ServerCommunicator Objekt.
@@ -58,28 +140,93 @@ public abstract class ServerCommunicator implements Runnable {
             this.reader = new BufferedReader(this.inReader);
 
             this.listener = new Thread(this);
-            //this.listener.start();
+            this.listener.start();
         }
     }
 
     @Override
     public void run() {
-        byte[] buffer = new byte[DefaulBufferSize];
-        while (!Thread.currentThread().isInterrupted()) {
+        boolean conReading = true;
+        while (!Thread.currentThread().isInterrupted() && client.isConnected()) {
             try {
-                this.in.read(buffer, 0, 1);
-                if(buffer[0] >= 100) {
-                    //TODO: Fnc call
+                if(!conReading){
+                    try {
+                        reading.acquire();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    conReading = true;
+                }
+
+                byte bt = this.readByte();
+                if(bt >= 100) {
+                    ClientFunction fnc = ClientFunction.fromByte(bt);
+
+                    if(fnc != ClientFunction.Undefined) {
+                        long uid;
+                        short rid;
+                        String msg;
+
+                        switch (fnc) {
+                            case ReceiveA:
+                                uid = this.readLong();
+                                rid = this.readShort();
+                                msg = this.readString();
+                                this.onNewMessage(uid, rid, msg);
+                                break;
+                            case ReceiveB:
+                                uid = this.readLong();
+                                msg = this.readString();
+                                this.onNewMessage(uid, msg);
+                                break;
+                        }
+                    }
                 } else {
-                    Response rsp = new Response(ServerFunction.fromByte(buffer[0]), this.in);
-                    if(rsp.isValid()) {
-                        //TODO: Add response to special mega super duper responses list.
+                    ServerFunction fnc = ServerFunction.fromByte(bt);
+
+                    if(fnc != ServerFunction.Undefined) {
+                        switch (fnc) {
+                            case Login:
+                                if(isWaitingForLoginResponse) {
+                                    conReading = false;
+                                    this.reading.release();
+                                    this.allowLoginResponse.release();
+                                }
+                                break;
+
+                            case ResolveUser:
+                                if(isWaitingForResolveUserResponse) {
+                                    conReading = false;
+                                    this.reading.release();
+                                    this.allowResolveUserResponse.release();
+                                }
+                                break;
+
+                            case SendA:
+                                if(isWaitingForSendAResponse) {
+                                    conReading = false;
+                                    this.reading.release();
+                                    this.allowSendAResponse.release();
+                                }
+                                break;
+                            case SendB:
+                                if(isWaitingForSendBResponse) {
+                                    conReading = false;
+                                    this.reading.release();
+                                    this.allowSendBResponse.release();
+                                }
+                                break;
+                        }
                     }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+
+        if(!client.isConnected())
+            this.onConnectionClosed();
     }
 
     /**
@@ -97,8 +244,11 @@ public abstract class ServerCommunicator implements Runnable {
      * @param pass Kennwort
      * @throws ServerErrorException
      * @throws UserNotFoundException
+     * @throws ClientErrorException
+     * @throws ConnectionTimeoutException
+     * @throws InvalidResponseStatusException
      */
-    public void login(String user, String pass) throws ServerErrorException, UserNotFoundException, IOException
+    public void login(String user, String pass) throws ServerErrorException, UserNotFoundException, ClientErrorException, ConnectionTimeoutException, InvalidResponseStatusException
     {
         if(this.isAuthenticated()) {
             this.logout();
@@ -108,16 +258,78 @@ public abstract class ServerCommunicator implements Runnable {
         rq.addArgValue(user);
         rq.addArgValue(pass);
 
-        out.write(rq.getBytes());
+        if(this.isWaitingForLoginResponse)
+            throw new ClientErrorException();
 
+        try {
+            this.out.write(rq.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        this.isWaitingForLoginResponse = true;
+        try {
+            if(!this.allowLoginResponse.tryAcquire(this.ResponseWaitingTime, TimeUnit.SECONDS)) {
+                throw new ConnectionTimeoutException();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new ClientErrorException();
+        } finally {
+            this.isWaitingForLoginResponse = false;
+        }
+
+        try {
+            this.reading.acquire();
+
+            ResponseStatus status = null;
+            try {
+                status = this.readStatus();
+
+                switch (status) {
+                    case Success:
+                        this.ssid = this.readLong();
+                        break;
+                    case UserNotFound:
+                        throw new UserNotFoundException();
+                    case ServerError:
+                        throw new ServerErrorException();
+                    default:
+                        throw new InvalidResponseStatusException();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new ClientErrorException();
+        } finally {
+            this.reading.release();
+        }
     }
 
     /**
      * Meldet den Benutzer ab.
      */
     public void logout() {
+        if(!isAuthenticated())
+            return;
+
         this.ssid = 0;
 
+        Request rq = new Request(ServerFunction.Logout);
+        try {
+            rq.addArgValue(this.getSSID());
+
+            try {
+                this.out.write(rq.getBytes());
+            } catch (IOException e) {
+                this.onConnectionClosed();
+            }
+        } catch (InvalidSSIDException e) {
+            e.printStackTrace();
+            //Ich fresse einen Besen, wenn dieser Fall jemals eintritt.
+        }
     }
 
     /**
@@ -139,10 +351,77 @@ public abstract class ServerCommunicator implements Runnable {
      * @throws ServerErrorException
      * @throws InvalidSSIDException
      * @throws UserNotFoundException
+     * @throws InvalidResponseStatusException
+     * @throws ClientErrorException
+     * @throws ConnectionTimeoutException
+     * @throws ClientNotAutheticatedException
      */
-    public void sendMessage(long userId, String message) throws ServerErrorException, InvalidSSIDException, UserNotFoundException
-    {
+    public void sendMessage(long userId, String message) throws ServerErrorException, InvalidSSIDException, UserNotFoundException, InvalidResponseStatusException, ClientErrorException, ConnectionTimeoutException, ClientNotAutheticatedException {
+        if(!isAuthenticated()) {
+            throw new ClientNotAutheticatedException();
+        }
 
+        Request rq = new Request(ServerFunction.SendB);
+        rq.addArgValue(this.getSSID());
+        rq.addArgValue(userId);
+        rq.addArgValue(message);
+
+        while (isWaitingForSendBResponse) {
+            try {
+                Thread.currentThread().wait(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                throw new ClientErrorException();
+            }
+        }
+
+        try {
+            this.out.write(rq.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        isWaitingForSendBResponse = true;
+
+        try {
+            if(!this.allowSendBResponse.tryAcquire(this.ResponseWaitingTime, TimeUnit.SECONDS)) {
+                throw new ConnectionTimeoutException();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new ClientErrorException();
+        } finally {
+            this.isWaitingForSendBResponse = false;
+        }
+
+        try {
+            this.reading.acquire();
+
+            ResponseStatus status = null;
+            try {
+                status = this.readStatus();
+
+                switch (status) {
+                    case Success:
+                        break;
+                    case UserNotFound:
+                        throw new UserNotFoundException();
+                    case InvalidSSID:
+                        throw new InvalidSSIDException();
+                    case ServerError:
+                        throw new ServerErrorException();
+                    default:
+                        throw new InvalidResponseStatusException();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new ClientErrorException();
+        } finally {
+            this.reading.release();
+        }
     }
 
     /**
@@ -152,10 +431,77 @@ public abstract class ServerCommunicator implements Runnable {
      * @throws ServerErrorException
      * @throws RoomNotFoundException
      * @throws InvalidSSIDException
+     * @throws ClientNotAutheticatedException
+     * @throws ClientErrorException
+     * @throws ConnectionTimeoutException
+     * @throws InvalidResponseStatusException
      */
-    public void sendMessage(short roomId, String message) throws ServerErrorException, RoomNotFoundException, InvalidSSIDException
-    {
+    public void sendMessage(short roomId, String message) throws ServerErrorException, RoomNotFoundException, InvalidSSIDException, ClientNotAutheticatedException, ClientErrorException, ConnectionTimeoutException, InvalidResponseStatusException {
+        if(!isAuthenticated()) {
+            throw new ClientNotAutheticatedException();
+        }
 
+        Request rq = new Request(ServerFunction.SendA);
+        rq.addArgValue(this.getSSID());
+        rq.addArgValue(roomId);
+        rq.addArgValue(message);
+
+        while (isWaitingForSendAResponse) {
+            try {
+                Thread.currentThread().wait(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                throw new ClientErrorException();
+            }
+        }
+
+        try {
+            this.out.write(rq.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        isWaitingForSendAResponse = true;
+
+        try {
+            if(!this.allowSendAResponse.tryAcquire(this.ResponseWaitingTime, TimeUnit.SECONDS)) {
+                throw new ConnectionTimeoutException();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new ClientErrorException();
+        } finally {
+            this.isWaitingForSendAResponse = false;
+        }
+
+        try {
+            this.reading.acquire();
+
+            ResponseStatus status = null;
+            try {
+                status = this.readStatus();
+
+                switch (status) {
+                    case Success:
+                        break;
+                    case RoomNotFound:
+                        throw new RoomNotFoundException();
+                    case InvalidSSID:
+                        throw new InvalidSSIDException();
+                    case ServerError:
+                        throw new ServerErrorException();
+                    default:
+                        throw new InvalidResponseStatusException();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new ClientErrorException();
+        } finally {
+            this.reading.release();
+        }
     }
 
     /**
@@ -165,10 +511,80 @@ public abstract class ServerCommunicator implements Runnable {
      * @throws ServerErrorException
      * @throws InvalidSSIDException
      * @throws UserNotFoundException
+     * @throws ClientNotAutheticatedException
+     * @throws ClientErrorException
+     * @throws ConnectionTimeoutException
+     * @throws InvalidResponseStatusException
      */
-    public User resolveUser(long userId) throws ServerErrorException, InvalidSSIDException, UserNotFoundException
-    {
-        return null;
+    public User resolveUser(long userId) throws ServerErrorException, InvalidSSIDException, UserNotFoundException, ClientNotAutheticatedException, ClientErrorException, ConnectionTimeoutException, InvalidResponseStatusException {
+        if(!isAuthenticated()) {
+            throw new ClientNotAutheticatedException();
+        }
+
+        Request rq = new Request(ServerFunction.ResolveUser);
+        rq.addArgValue(this.getSSID());
+        rq.addArgValue(userId);
+
+        while (isWaitingForResolveUserResponse) {
+            try {
+                Thread.currentThread().wait(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                throw new ClientErrorException();
+            }
+        }
+
+        try {
+            this.out.write(rq.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        isWaitingForResolveUserResponse = true;
+
+        try {
+            if(!this.allowResolveUserResponse.tryAcquire(this.ResponseWaitingTime, TimeUnit.SECONDS)) {
+                throw new ConnectionTimeoutException();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new ClientErrorException();
+        } finally {
+            this.isWaitingForResolveUserResponse = false;
+        }
+
+        User u = null;
+        try {
+            this.reading.acquire();
+
+            ResponseStatus status = null;
+            try {
+                status = this.readStatus();
+
+                switch (status) {
+                    case Success:
+                        u = new User(this.in);
+                        break;
+                    case UserNotFound:
+                        throw new UserNotFoundException();
+                    case InvalidSSID:
+                        throw new InvalidSSIDException();
+                    case ServerError:
+                        throw new ServerErrorException();
+                    default:
+                        throw new InvalidResponseStatusException();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new ClientErrorException();
+        } finally {
+            this.reading.release();
+        }
+
+        return u;
     }
 
     /**
@@ -185,4 +601,9 @@ public abstract class ServerCommunicator implements Runnable {
      * @param message Die Nachricht.
      */
     public abstract void onNewMessage(long userId, short roomId, String message);
+
+    /**
+     * Wir aufgerufen, sobald die Verbindung zum Server unterbrochen wurde.
+     */
+    public abstract void onConnectionClosed();
 }
