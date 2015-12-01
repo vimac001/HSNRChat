@@ -18,7 +18,9 @@
         android:id="@+id/login_"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="74dp" />
+        android:layout_marginTop="74dp"
+
+        />
 
     <EditText
         android:layout_width="wrap_content"
@@ -27,7 +29,8 @@
         android:ems="10"
         android:id="@+id/input_username"
         android:layout_below="@+id/login_"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        />
 
     <EditText
         android:layout_width="wrap_content"
@@ -44,12 +47,15 @@
         android:layout_height="wrap_content"
         android:text="Anmelden"
         android:id="@+id/bt_login"
-        android:layout_below="@+id/input_password"
-        android:layout_centerHorizontal="true"
         android:textSize="45sp"
         android:textColor="#FFFFFF"
 
+        android:background="@drawable/buttonshape"
         android:shadowColor="#0530A8"
         android:shadowRadius="5"
-        />
+        android:layout_below="@+id/input_password"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="110dp" />
+
+
 </RelativeLayout>
