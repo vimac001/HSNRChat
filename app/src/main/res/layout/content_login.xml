@@ -45,5 +45,11 @@
         android:text="Anmelden"
         android:id="@+id/bt_login"
         android:layout_below="@+id/input_password"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:textSize="45sp"
+        android:textColor="#FFFFFF"
+
+        android:shadowColor="#0530A8"
+        android:shadowRadius="5"
+        />
 </RelativeLayout>
