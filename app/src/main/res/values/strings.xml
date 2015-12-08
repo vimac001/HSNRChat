@@ -15,5 +15,6 @@
     <string name="title_activity_detail">DetailActivity</string>
     <string name="title_activity_semester">SemesterActivity</string>
     <string name="title_activity_chat">ChatActivity</string>
+    <string name="title_activity_login">login</string>
 
 </resources>
