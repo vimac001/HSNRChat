@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.hs_niederrhein.chat.hsnrchat.Database.DatabaseOpenHelper;
-import de.hs_niederrhein.chat.hsnrchat.Type.Faculty;
+import de.hs_niederrhein.chat.hsnrchat.types.Faculty;
 
 public class DetailActivity extends AppCompatActivity {
     private List<Faculty> faculties = new ArrayList<Faculty>();

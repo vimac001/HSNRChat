@@ -17,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.hs_niederrhein.chat.hsnrchat.Database.DatabaseOpenHelper;
-import de.hs_niederrhein.chat.hsnrchat.Networking.Talker;
-import de.hs_niederrhein.chat.hsnrchat.Type.Faculty;
+//import de.hs_niederrhein.chat.hsnrchat.Networking.Talker;
+import de.hs_niederrhein.chat.hsnrchat.types.Faculty;
 
 public class MainActivity extends AppCompatActivity {
     private DatabaseOpenHelper db = new DatabaseOpenHelper(this);
