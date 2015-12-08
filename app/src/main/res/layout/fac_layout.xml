@@ -17,7 +17,7 @@
     <ImageView
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:src="@drawable/fb01_k"
+        android:src="@drawable/fb01"
         android:id="@+id/item_icon"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
