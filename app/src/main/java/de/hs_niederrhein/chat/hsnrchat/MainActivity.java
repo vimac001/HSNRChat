@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         db.insertFaculties();
-        db.insertTestData();
 
         populateFACData();
         populateFACListView();
@@ -42,17 +41,17 @@ public class MainActivity extends AppCompatActivity {
         facList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                startDetailActivity(position);
+                startChatActivity(position);
 
             }
         });
     }
 
-    private void startDetailActivity(int position) {
+    private void startChatActivity(int position) {
         System.out.println("Position:" + position);
-        Intent changeToDetailView = new Intent(this, DetailActivity.class);
-        changeToDetailView.putExtra("facNummer", ++position);
-        startActivity(changeToDetailView);
+        Intent changeToChatView = new Intent(this, ChatActivity.class);
+        changeToChatView.putExtra("facID", ++position);
+        startActivity(changeToChatView);
     }
 
     private void populateFACData() {

@@ -28,7 +28,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        // ClientServerCommunciator.connect("0.0.0.0",1337); //Richtige IP ergänzen
+        // ClientServerCommunciator.connect(this,"0.0.0.0",1337); //Richtige IP ergänzen
         Button bt_login = (Button)findViewById(R.id.bt_login);
         bt_login.setOnClickListener(new View.OnClickListener() {
             @Override
