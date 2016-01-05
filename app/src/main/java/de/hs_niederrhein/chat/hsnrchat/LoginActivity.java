@@ -13,6 +13,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ClientErrorException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ConnectionTimeoutException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.InvalidResponseStatusException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ServerErrorException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.UserNotFoundException;
+import de.hs_niederrhein.chat.hsnrchat.types.ClientServerCommunciator;
+
 public class LoginActivity extends AppCompatActivity {
     private String _username;
     private String _password;
@@ -21,7 +28,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        // ClientServerCommunciator.connect("0.0.0.0",1337); //Richtige IP ergänzen
         Button bt_login = (Button)findViewById(R.id.bt_login);
         bt_login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,6 +52,19 @@ public class LoginActivity extends AppCompatActivity {
         }else if(this._password.isEmpty()){
                 alert("Bitte Passwort eingeben!");
         }else{
+            /*try {
+               ClientServerCommunciator.LoginUser(this._username,this._password);
+            } catch (UserNotFoundException e) {
+                e.printStackTrace();
+            } catch (ConnectionTimeoutException e) {
+                e.printStackTrace();
+            } catch (InvalidResponseStatusException e) {
+                e.printStackTrace();
+            } catch (ServerErrorException e) {
+                e.printStackTrace();
+            } catch (ClientErrorException e) {
+                e.printStackTrace();
+            }*/
             changeToMainActivity();
         }
 
