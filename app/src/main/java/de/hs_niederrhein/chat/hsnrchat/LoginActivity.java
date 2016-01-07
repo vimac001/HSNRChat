@@ -9,9 +9,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import java.io.IOException;
 
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ClientErrorException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ConnectionTimeoutException;
@@ -23,6 +26,8 @@ import de.hs_niederrhein.chat.hsnrchat.types.ClientServerCommunciator;
 public class LoginActivity extends AppCompatActivity {
     private String _username;
     private String _password;
+
+    CommunicatorExample com;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +42,12 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+
+        try {
+            com = new CommunicatorExample("192.168.2.107", 1337);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -65,7 +76,21 @@ public class LoginActivity extends AppCompatActivity {
             } catch (ClientErrorException e) {
                 e.printStackTrace();
             }*/
-            changeToMainActivity();
+
+            try {
+                com.login(this._username, this._password);
+                changeToMainActivity();
+            } catch (ServerErrorException e) {
+                Log.e("Error", "ServerError");
+            } catch (UserNotFoundException e) {
+                Log.e("Error", "User Not Found");
+            } catch (ClientErrorException e) {
+                Log.e("Error", "ClientError");
+            } catch (ConnectionTimeoutException e) {
+                Log.e("Error", "Login Response Timeout");
+            } catch (InvalidResponseStatusException e) {
+                Log.e("Error", "WTF: Status not exist.");
+            }
         }
 
 

@@ -20,6 +20,7 @@ public class CommunicatorExample extends ServerCommunicator {
     public CommunicatorExample(String host, int port) throws UnknownHostException, IOException {
         super(host, port);
 
+        /*
         try {
             this.login("root", "toor");
         } catch (ServerErrorException e) {
@@ -32,7 +33,7 @@ public class CommunicatorExample extends ServerCommunicator {
             e.printStackTrace();
         } catch (ClientErrorException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     @Override
