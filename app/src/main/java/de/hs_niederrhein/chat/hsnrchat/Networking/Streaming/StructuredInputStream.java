@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
+import de.hs_niederrhein.chat.hsnrchat.Networking.ResponseStatus;
+
 public class StructuredInputStream extends DataInputStream {
     /**
      * Constructs a new StructuredInputStream on the InputStream {@code in}. All
@@ -22,6 +24,10 @@ public class StructuredInputStream extends DataInputStream {
      */
     public StructuredInputStream(InputStream in) {
         super(in);
+    }
+
+    public ResponseStatus readStatus() throws IOException {
+        return ResponseStatus.fromByte(this.readByte());
     }
 
 }
