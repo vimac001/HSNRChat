@@ -30,6 +30,7 @@
             android:id="@+id/chat_edit"
             android:inputType="textMultiLine"
             android:ems="10"
+
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
@@ -40,7 +41,9 @@
             android:layout_height="wrap_content"
             android:text="@string/senden"
             android:id="@+id/chat_btsend"
-            android:layout_alignBottom="@+id/chat_edit"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/sendbutton"
+            android:layout_above="@+id/chat_edit"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true" />
 
