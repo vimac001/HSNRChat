@@ -11,8 +11,17 @@ import de.hs_niederrhein.chat.hsnrchat.R;
  * Created by Jennifer on 05.11.2015.
  */
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "FacDatabase1";
+    private static final String DATABASE_NAME = "FacDatabase2";
     private static final int DATABASE_VERSION = 1;
+
+    public String faculties = "faculties";
+    public String messages = "messages";
+
+    public String facNummer = "facNummer";
+    public String facName = "facName";
+    public String facIcon = "facIcon";
+    public String message = "message";
+    public String userID = "userID";
 
     public DatabaseOpenHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -20,19 +29,32 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE facData(" +
-                "facID INTEGER PRIMARY KEY," +
-                "facNummer INTEGER," +
-                "facName TEXT," +
-                "facNumberOfSemester INTEGER," +
-                "facType TEXT);");
-        db.execSQL("CREATE TABLE faculties(" +
-                "facNummer INTEGER PRIMARY KEY," +
-                "facName TEXT, " +
-                "facIcon INTEGER);");
+        db.execSQL("CREATE TABLE "+faculties+"(" +
+                facNummer +" INTEGER PRIMARY KEY," +
+                facName+ " TEXT, " +
+                facIcon+ " INTEGER);");
+        db.execSQL("CREATE TABLE "+ messages + "(" +
+                facNummer+ " INTEGER," +
+                message+ " TEXT PRIMARY KEY, "+
+                userID+ " INTEGER);");
 
         insertFaculties();
 
+    }
+
+    public long insertMessage(int facNummer, String message, int userID){
+        long rowid = -1;
+        try{
+            SQLiteDatabase db = getWritableDatabase();
+            ContentValues values = new ContentValues();
+            values.put("facNummer", facNummer);
+            values.put("message", message);
+            values.put("userID", userID);
+            rowid = db.insertWithOnConflict("messages", null,values,SQLiteDatabase.CONFLICT_REPLACE);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return rowid;
     }
 
     public void insertFaculties() {
@@ -60,7 +82,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
             rowid = db.insertWithOnConflict("faculties", null, values, SQLiteDatabase.CONFLICT_REPLACE);
             System.out.println("Hinzugefügt: " + rowid);
         }catch(Exception e){
-            e.getCause();
+            e.printStackTrace();
         }
 
         return rowid;
@@ -72,26 +94,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     }
 
 
-    private long insertIntoTable(int facID, int facNummer, String facName, int facNumberOfSemester, String type){
-        long rowid = -1;
-        SQLiteDatabase db = getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("facID", facID);
-        values.put("facNummer", facNummer);
-        values.put("facName", facName);
-        values.put("facNumberOfSemester", facNumberOfSemester);
-        values.put("facType", type);
-        rowid= db.insertWithOnConflict("facData", null, values,SQLiteDatabase.CONFLICT_REPLACE);
-        System.out.println("Hinzugefügt: " + rowid);
-        return rowid;
-    }
 
-    public void insertTestData() {
-        insertIntoTable(1, 1, "Chemieingenieurwesen", 6, "Bachelor");
-        insertIntoTable(2, 1, "Chemie und Biotechnologie", 6, "Bachelor");
-        insertIntoTable(3, 2, "Design", 7, "Bachelor");
-        insertIntoTable(4, 3, "Elektrotechnik", 7, "Bachelor");
-        insertIntoTable(5,3,"Informatik", 6,"Bachelor");
 
 
 
@@ -100,4 +103,3 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
 
 
-}

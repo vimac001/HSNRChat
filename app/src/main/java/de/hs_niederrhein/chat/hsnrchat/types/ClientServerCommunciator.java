@@ -1,8 +1,11 @@
-package de.hs_niederrhein.chat.hsnrchat;
+package de.hs_niederrhein.chat.hsnrchat.types;
+
+import android.content.Context;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import de.hs_niederrhein.chat.hsnrchat.Database.DatabaseOpenHelper;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ClientErrorException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ClientNotAutheticatedException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ConnectionTimeoutException;
@@ -13,30 +16,38 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.UserNotFoundExceptio
 import de.hs_niederrhein.chat.hsnrchat.Networking.ServerCommunicator;
 import de.hs_niederrhein.chat.hsnrchat.Networking.User;
 
+/**
+ * Created by Jennifer on 05.01.2016.
+ */
+public class ClientServerCommunciator extends ServerCommunicator {
+    private static ClientServerCommunciator obj = null;
+    private DatabaseOpenHelper db ;
+    private Context context;
 
-public class CommunicatorExample extends ServerCommunicator {
-
-
-    public CommunicatorExample(String host, int port) throws UnknownHostException, IOException {
-        super(host, port);
-
-        /*
-        try {
-            this.login("root", "toor");
-        } catch (ServerErrorException e) {
-            e.printStackTrace();
-        } catch (UserNotFoundException e) {
-            e.printStackTrace();
-        } catch (ConnectionTimeoutException e) {
-            e.printStackTrace();
-        } catch (InvalidResponseStatusException e) {
-            e.printStackTrace();
-        } catch (ClientErrorException e) {
-            e.printStackTrace();
-        }*/
+    public static ClientServerCommunciator connect(Context contex,String host, int port){
+        if(obj == null) {
+            try {
+                obj = new ClientServerCommunciator(contex, host,port);
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+        return obj;
     }
 
-    @Override
+    private ClientServerCommunciator(Context contex,String host, int port) throws UnknownHostException, IOException {
+        super(host, port);
+        this.context = contex;
+        this.db = new DatabaseOpenHelper(contex);
+    }
+
+    public static void LoginUser(String uname, String passwd) throws UserNotFoundException, ConnectionTimeoutException, InvalidResponseStatusException, ServerErrorException, ClientErrorException {
+
+        obj.login(uname, passwd);
+
+    }
+
+    @Override //für Privat Chats
     public void onNewMessage(long userId, String message) {
         try {
             User user = this.resolveUser(userId);
@@ -59,9 +70,9 @@ public class CommunicatorExample extends ServerCommunicator {
         }
     }
 
-    @Override
+    @Override //Für Chaträume
     public void onNewMessage(long userId, short roomId, String message) {
-
+        db.insertMessage(roomId,message,(int)userId);
     }
 
     @Override

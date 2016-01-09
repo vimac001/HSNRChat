@@ -34,9 +34,11 @@
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/chat_listView"
+        android:id="@+id/chat_listview"
         android:layout_above="@+id/chat_btsend"
-        android:layout_centerHorizontal="true" />
+   />
+
+
 
 
 </RelativeLayout>

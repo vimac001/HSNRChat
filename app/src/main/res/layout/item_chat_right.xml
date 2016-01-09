@@ -7,6 +7,8 @@
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:text="chat right"
-        android:id="@+id/bubble_right"
+        android:id="@+id/id_text"
+        android:textSize="30dp"
+        android:textAlignment="0"
         android:layout_gravity="right" />
 </LinearLayout>
