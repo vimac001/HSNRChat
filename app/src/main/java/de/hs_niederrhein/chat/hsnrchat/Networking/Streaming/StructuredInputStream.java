@@ -29,5 +29,4 @@ public class StructuredInputStream extends DataInputStream {
     public ResponseStatus readStatus() throws IOException {
         return ResponseStatus.fromByte(this.readByte());
     }
-
 }

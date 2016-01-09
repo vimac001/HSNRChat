@@ -27,13 +27,13 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Streaming.StructuredOutputStre
 
 public abstract class ServerCommunicator implements Runnable {
 
-    public static final String DefaultHost = "192.168.2.113";
-    public static final int DefaultPort = 1337;
+    public static final String DefaultHost = "viktor-machnik.eu";
+    public static final int DefaultPort = 1338;
 
     /**
      * Die Wartezeit auf eine Antwort vom Server (in Sekunden).
      */
-    protected int ResponseWaitingTime = 1500;
+    protected int ResponseWaitingTime = 15;
 
     private Thread listener;
 
@@ -191,7 +191,7 @@ public abstract class ServerCommunicator implements Runnable {
      * @return
      */
     public boolean isAuthenticated() {
-        return (this.ssid > 0);
+        return (this.ssid != 0);
     }
 
     /**
@@ -296,7 +296,44 @@ public abstract class ServerCommunicator implements Runnable {
      * @throws ClientNotAutheticatedException
      */
     public void sendMessage(long userId, String message) throws ServerErrorException, InvalidSSIDException, UserNotFoundException, InvalidResponseStatusException, ClientErrorException, ConnectionTimeoutException, ClientNotAutheticatedException {
+        if(!this.isAuthenticated()) {
+            throw new ClientNotAutheticatedException();
+        }
 
+        Request rq = new Request(ServerFunction.SendB);
+        rq.addArgValue(this.getSSID());
+        rq.addArgValue(userId);
+        rq.addArgValue(message);
+
+        try {
+            this.writeData(rq.getBytes());
+            this.rwaitings.get(ServerFunction.SendB).acquire(); //Wait for response
+            //Response is arrived
+            Response rsp = this.responses.put(ServerFunction.SendB, null);
+            if(rsp == null)
+                throw new ClientErrorException();
+
+            switch (rsp.getStatus()) {
+                case Success:
+                    break;
+                case UserNotFound:
+                    throw new UserNotFoundException();
+
+                case ServerError:
+                    throw new ServerErrorException();
+
+                case InvalidSSID:
+                    throw new InvalidSSIDException();
+
+                default:
+                    throw new InvalidResponseStatusException();
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -312,7 +349,44 @@ public abstract class ServerCommunicator implements Runnable {
      * @throws InvalidResponseStatusException
      */
     public void sendMessage(short roomId, String message) throws ServerErrorException, RoomNotFoundException, InvalidSSIDException, ClientNotAutheticatedException, ClientErrorException, ConnectionTimeoutException, InvalidResponseStatusException {
+        if(!this.isAuthenticated()) {
+            throw new ClientNotAutheticatedException();
+        }
 
+        Request rq = new Request(ServerFunction.SendA);
+        rq.addArgValue(this.getSSID());
+        rq.addArgValue(roomId);
+        rq.addArgValue(message);
+
+        try {
+            this.writeData(rq.getBytes());
+            this.rwaitings.get(ServerFunction.SendA).acquire(); //Wait for response
+            //Response is arrived
+            Response rsp = this.responses.put(ServerFunction.SendA, null);
+            if(rsp == null)
+                throw new ClientErrorException();
+
+            switch (rsp.getStatus()) {
+                case Success:
+                    break;
+                case RoomNotFound:
+                    throw new RoomNotFoundException();
+
+                case ServerError:
+                    throw new ServerErrorException();
+
+                case InvalidSSID:
+                    throw new InvalidSSIDException();
+
+                default:
+                    throw new InvalidResponseStatusException();
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -328,8 +402,48 @@ public abstract class ServerCommunicator implements Runnable {
      * @throws InvalidResponseStatusException
      */
     public User resolveUser(long userId) throws ServerErrorException, InvalidSSIDException, UserNotFoundException, ClientNotAutheticatedException, ClientErrorException, ConnectionTimeoutException, InvalidResponseStatusException {
+        if(!this.isAuthenticated()) {
+            throw new ClientNotAutheticatedException();
+        }
 
-        return null;
+        User u = null;
+
+        Request rq = new Request(ServerFunction.ResolveUser);
+        rq.addArgValue(this.getSSID());
+        rq.addArgValue(userId);
+
+        try {
+            this.writeData(rq.getBytes());
+            this.rwaitings.get(ServerFunction.ResolveUser).acquire(); //Wait for response
+            //Response is arrived
+            Response rsp = this.responses.put(ServerFunction.ResolveUser, null);
+            if(rsp == null)
+                throw new ClientErrorException();
+
+            switch (rsp.getStatus()) {
+                case Success:
+                    u = new User(rsp);
+
+                case UserNotFound:
+                    throw new UserNotFoundException();
+
+                case ServerError:
+                    throw new ServerErrorException();
+
+                case InvalidSSID:
+                    throw new InvalidSSIDException();
+
+                default:
+                    throw new InvalidResponseStatusException();
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return u;
     }
 
     /**

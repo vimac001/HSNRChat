@@ -5,6 +5,7 @@ import android.provider.ContactsContract;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,20 +64,51 @@ public class Response {
         return this.status;
     }
 
+    protected static short switchBytes(short nw_short) {
+        //byte[] bytes = ByteBuffer.allocate(Short.SIZE / Byte.SIZE).putShort(nw_short).array();
+        int ret = (nw_short & 0xff);
+        ret <<= Byte.SIZE;
+        ret |= ((nw_short >> Byte.SIZE) & 0xff);
+        return (short)ret;
+    }
+
     public byte pullByte() throws IOException {
         return this.is.readByte();
     }
 
     public short pullShort() throws IOException {
-        return this.is.readShort();
+        short tmp = this.is.readShort();
+        return switchBytes(tmp);
     }
 
     public int pullInt() throws IOException {
-        return this.is.readInt();
+        int tmp = this.is.readInt();
+        int ret = 0;
+
+        for(int i = 0; i < (Integer.SIZE / Short.SIZE); i++) {
+            int shift = Short.SIZE * i;
+            short st = (short)((tmp >> shift) & 0xffff);
+            st = switchBytes(st);
+            ret <<= Short.SIZE;
+            ret |= (st & 0xffff);
+        }
+
+        return ret;
     }
 
     public long pullLong() throws IOException {
-        return this.is.readLong();
+        long tmp = this.is.readLong();
+        long ret = 0;
+
+        for(int i = 0; i < (Long.SIZE / Short.SIZE); i++) {
+            int shift = Short.SIZE * i;
+            short st = (short)((tmp >> shift) & 0xffff);
+            st = switchBytes(st);
+            ret <<= Short.SIZE;
+            ret |= (st & 0xffff);
+        }
+
+        return ret;
     }
 
     public String pullString() throws IOException {

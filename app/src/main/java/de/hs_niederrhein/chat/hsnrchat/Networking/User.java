@@ -8,8 +8,8 @@ public class User extends NetworkObject {
     protected String user;
     protected String nick;
 
-    public User(InputStream in) throws IOException {
-        super(in);
+    public User(Response rsp) throws IOException {
+        super(rsp);
     }
 
     public long getId() {
@@ -21,13 +21,17 @@ public class User extends NetworkObject {
     }
 
     public String getDisplayName() {
+        if(this.nick.isEmpty()) {
+            this.nick = this.user;
+        }
+
         return this.nick;
     }
 
     @Override
     protected void readSelf() throws IOException {
-        this.Id = this.readLong();
-        this.user = this.readString();
-        this.nick = this.readString();
+        this.Id = this.response.pullLong();
+        this.user = this.response.pullString();
+        this.nick = this.response.pullString();
     }
 }
