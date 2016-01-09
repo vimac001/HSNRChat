@@ -4,11 +4,16 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:layout_width="150dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_margin="5dip"
         android:text="chat right"
+        android:background="@drawable/bubble_a"
+        android:paddingLeft="10dip"
         android:id="@+id/id_text"
-        android:textSize="30dp"
+        android:textSize="15dp"
         android:textAlignment="0"
+        android:textColor="@color/colorChat"
         android:layout_gravity="right" />
 </LinearLayout>
