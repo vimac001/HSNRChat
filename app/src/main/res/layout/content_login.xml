@@ -63,7 +63,7 @@
         android:bottom="0dp"
         android:width="270dp"
         android:height="60dp"
-        android:color="#878787"
+        android:color="#014493"
 
         android:shadowColor="#0530A8"
         android:shadowRadius="5"
