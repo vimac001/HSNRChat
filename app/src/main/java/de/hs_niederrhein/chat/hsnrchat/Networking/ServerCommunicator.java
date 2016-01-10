@@ -28,7 +28,7 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Streaming.StructuredOutputStre
 public abstract class ServerCommunicator {
 
     public static final String DefaultHost = "viktor-machnik.eu";
-    public static final int DefaultPort = 1337;
+    public static final int DefaultPort = 1338;
 
     private String host;
     private int port;
@@ -40,6 +40,7 @@ public abstract class ServerCommunicator {
     private Map<ServerFunction, Semaphore> rwaitings;
 
     private long ssid = 0;
+    private long userId = 0;
 
     /**
      * Initialisiert ein neues ServerCommunicator Objekt.
@@ -112,6 +113,7 @@ public abstract class ServerCommunicator {
             switch (rsp.getStatus()) {
                 case Success:
                     this.ssid = rsp.pullLong();
+                    this.userId = rsp.pullLong();
                     break;
                 case UserNotFound:
                     throw new UserNotFoundException();
@@ -150,9 +152,8 @@ public abstract class ServerCommunicator {
             } catch (ConnectionTimeoutException e) {
                 e.printStackTrace();
             }
-        } catch (InvalidSSIDException e) {
+        } catch (ClientNotAutheticatedException e) {
             e.printStackTrace();
-            //Ich fresse einen Besen, wenn dieser Fall jemals eintritt.
         }
     }
 
@@ -161,11 +162,18 @@ public abstract class ServerCommunicator {
      * @return Aktuelle SSID
      * @throws InvalidSSIDException
      */
-    public long getSSID() throws InvalidSSIDException {
+    public long getSSID() throws ClientNotAutheticatedException {
         if(this.ssid == 0)
-            throw new InvalidSSIDException();
+            throw new ClientNotAutheticatedException();
 
         return this.ssid;
+    }
+
+    public long getUserId() throws ClientNotAutheticatedException {
+        if(this.userId == 0)
+            throw new ClientNotAutheticatedException();
+
+        return this.userId;
     }
 
     /**

@@ -21,10 +21,18 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.hs_niederrhein.chat.hsnrchat.Database.DatabaseOpenHelper;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ClientErrorException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ClientNotAutheticatedException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ConnectionTimeoutException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.InvalidResponseStatusException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.InvalidSSIDException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ServerErrorException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.UserNotFoundException;
 import de.hs_niederrhein.chat.hsnrchat.types.Faculty;
 import de.hs_niederrhein.chat.hsnrchat.types.Message;
 
@@ -45,7 +53,7 @@ public class ChatActivity extends AppCompatActivity {
             this.facID = intent.getIntExtra("facID",0);
         }
 
-        populateMessagesForTesting();
+        populateMessages();
         populateMessageListView();
         registerClick();
 
@@ -53,22 +61,18 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-    public void populateMessagesForTesting(){
-        /*
+    public void populateMessages(){
         SQLiteDatabase read = db.getReadableDatabase();
         String where_clause = db.facNummer + "=" + this.facID;
         Cursor c = read.query(db.messages, new String[]{db.facNummer, db.message, db.userID}, where_clause,null,null,null,null);
         while(c.moveToNext()){
             messages.add(new Message(
                     (long)c.getInt(c.getColumnIndex(db.facNummer)),
+                    (long)c.getInt(c.getColumnIndex(db.userID)),
                     c.getString(c.getColumnIndex(db.message)),
                     false)); //Hier noch vergleichen ob es der eigene User ist oder nicht !!
         }
-        */
 
-        messages.add(new Message(10, "Hallo", true));
-        messages.add(new Message(20, "Hi, wie geht es dir?", false));
-        messages.add(new Message(10, "Mir geht es gut, danke!", true));
     }
 
     private void populateMessageListView() {
@@ -85,22 +89,44 @@ public class ChatActivity extends AppCompatActivity {
                 EditText editText = (EditText) findViewById(R.id.chat_edit);
                 if (editText.getText().toString() != "") {
 
-                    //Hier eigentlich Nachricht an Server schicken !!!
-                    Message msg = new Message(20, editText.getText().toString(), false);
-                    messages.add(msg);
-                    editText.setText("");
+                    //Nachricht an Server schicken
+                    try {
+                        sendMessageToServer(editText.getText().toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ConnectionTimeoutException e) {
+                        e.printStackTrace();
+                    } catch (InvalidSSIDException e) {
+                        e.printStackTrace();
+                    } catch (ClientNotAutheticatedException e) {
+                        e.printStackTrace();
+                    } catch (InvalidResponseStatusException e) {
+                        e.printStackTrace();
+                    } catch (ServerErrorException e) {
+                        e.printStackTrace();
+                    } catch (UserNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (ClientErrorException e) {
+                        e.printStackTrace();
+                    }
 
+                    //Editfeld leeren
+                    editText.setText("");
                     //Tastatur schließen
                     hideKeyboard(ChatActivity.this);
 
                     //Um immer nach unten zu scrollen
-                    ListView listView = (ListView)findViewById(R.id.chat_listview);
+                    ListView listView = (ListView) findViewById(R.id.chat_listview);
                     listView.smoothScrollToPosition(messages.size());
                 }
 
 
             }
         });
+    }
+
+    public void sendMessageToServer(String message) throws IOException, ConnectionTimeoutException, InvalidSSIDException, ClientNotAutheticatedException, InvalidResponseStatusException, ServerErrorException, UserNotFoundException, ClientErrorException {
+        ClientServerCommunicator.get(this).sendMessage(this.facID,message);
     }
 
     public static void hideKeyboard(Activity activity) {
