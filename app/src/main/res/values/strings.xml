@@ -17,6 +17,6 @@
     <string name="title_activity_chat">ChatActivity</string>
     <string name="title_activity_login">login</string>
     <string name="title_main">Fakultäten</string>
-    <string name="senden">Senden</string>
+    <string name="senden">send</string>
 
 </resources>
