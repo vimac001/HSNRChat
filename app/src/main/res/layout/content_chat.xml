@@ -30,8 +30,10 @@
             android:layout_height="wrap_content"
             android:id="@+id/chat_edit"
             android:inputType="textMultiLine"
-            android:ems="10"
-
+            android:ems="15"
+            android:background="@drawable/oval"
+            android:textSize="20sp"
+            android:text="Hier Text einfügen"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
