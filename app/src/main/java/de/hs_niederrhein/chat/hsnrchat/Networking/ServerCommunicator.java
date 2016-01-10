@@ -25,75 +25,21 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.UserNotFoundExceptio
 import de.hs_niederrhein.chat.hsnrchat.Networking.Streaming.StructuredInputStream;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Streaming.StructuredOutputStream;
 
-public abstract class ServerCommunicator implements Runnable {
+public abstract class ServerCommunicator {
 
     public static final String DefaultHost = "viktor-machnik.eu";
-    public static final int DefaultPort = 1338;
+    public static final int DefaultPort = 1337;
 
-    /**
-     * Die Wartezeit auf eine Antwort vom Server (in Sekunden).
-     */
-    protected int ResponseWaitingTime = 15;
-
-    private Thread listener;
-
-    private Socket client = null;
-    private InetAddress addr = null;
+    private String host;
     private int port;
 
-    private boolean conFailed = false;
-
-    private OutputStream out;
-    private InputStream in;
-
-    private StructuredInputStream is;
-    private StructuredOutputStream os;
-
-    private Semaphore writing = new Semaphore(0);
+    private Thread tListener;
+    private ServerHandle listener;
 
     private Map<ServerFunction, Response> responses;
     private Map<ServerFunction, Semaphore> rwaitings;
 
-    private byte readByte() throws IOException {
-        return this.is.readByte();
-    }
-
-    private short readShort() throws IOException {
-        return this.is.readShort();
-    }
-
-    private int readInt() throws IOException {
-        return this.is.readInt();
-    }
-
-    private long readLong() throws IOException {
-        return this.is.readLong();
-    }
-
-    private String readString() throws IOException {
-        return this.is.readUTF();
-    }
-
-    private ResponseStatus readStatus() throws IOException {
-        return ResponseStatus.fromByte(this.readByte());
-    }
-
     private long ssid = 0;
-
-    protected void writeData(byte[] data) throws IOException, InterruptedException, ConnectionTimeoutException {
-        if(this.conFailed)
-            return;
-
-        if(this.client == null || !this.client.isConnected())
-            if(!this.writing.tryAcquire(this.ResponseWaitingTime, TimeUnit.SECONDS))
-                throw new ConnectionTimeoutException();
-        else
-                this.writing.acquire();
-
-        this.os.write(data);
-        this.os.flush();
-        this.writing.release();
-    }
 
     /**
      * Initialisiert ein neues ServerCommunicator Objekt.
@@ -104,7 +50,7 @@ public abstract class ServerCommunicator implements Runnable {
      * @throws IOException
      */
     public ServerCommunicator(String host, int port) throws UnknownHostException {
-        this.addr = InetAddress.getByName(host);
+        this.host = host;
         this.port = port;
 
         this.responses = new TreeMap<>();
@@ -114,76 +60,17 @@ public abstract class ServerCommunicator implements Runnable {
         }
 
 
-        this.listener = new Thread(this);
-        this.listener.start();
+        this.listener = new ServerHandle(this);
+        this.tListener = new Thread(this.listener);
+        this.tListener.start();
     }
 
-    @Override
-    public void run() {
-        if(client == null || !client.isConnected()) {
-            try {
-                this.client = new Socket(this.addr, this.port);
+    public String getHost() {
+        return this.host;
+    }
 
-                if(this.client.isConnected()) {
-                    this.out = client.getOutputStream();
-                    this.in = client.getInputStream();
-
-                    this.is = new StructuredInputStream(this.in);
-                    this.os = new StructuredOutputStream(this.out);
-
-                    this.writing.release();
-                }
-            } catch (IOException e) {
-                //Connectiong failed
-                e.printStackTrace();
-                this.conFailed = true;
-                return;
-            }
-        }
-
-        while (!Thread.currentThread().isInterrupted() && client.isConnected()) {
-            try {
-                byte bt = this.readByte();
-
-                if(ServerFunction.fromByte(bt) == ServerFunction.Undefined) {
-                    ClientFunction fnc = ClientFunction.fromByte(bt);
-
-                    if(fnc != ClientFunction.Undefined) {
-                        long uid;
-                        short rid;
-                        String msg;
-
-                        switch (fnc) {
-                            case ReceiveA:
-                                uid = this.readLong();
-                                rid = this.readShort();
-                                msg = this.readString();
-                                this.onNewMessage(uid, rid, msg);
-                                break;
-                            case ReceiveB:
-                                uid = this.readLong();
-                                msg = this.readString();
-                                this.onNewMessage(uid, msg);
-                                break;
-                        }
-                    } else {
-                        //Bad Function Id
-                        Log.e("UnexpectedError", "Unknown functionId call.");
-                    }
-                } else {
-                    ServerFunction fnc = ServerFunction.fromByte(bt);
-
-                    Response tmp = new Response(this.is, fnc);
-                    responses.put(fnc, tmp);
-                    rwaitings.get(fnc).release();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if(!client.isConnected())
-            this.onConnectionClosed();
+    public int getPort() {
+        return this.port;
     }
 
     /**
@@ -215,7 +102,7 @@ public abstract class ServerCommunicator implements Runnable {
         rq.addArgValue(pass);
 
         try {
-            this.writeData(rq.getBytes());
+            this.listener.writeData(rq.getBytes());
             this.rwaitings.get(ServerFunction.Login).acquire(); //Wait for response
             //Response is arrived
             Response rsp = this.responses.put(ServerFunction.Login, null);
@@ -239,7 +126,7 @@ public abstract class ServerCommunicator implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            this.onConnectionClosed();
         }
     }
 
@@ -257,9 +144,7 @@ public abstract class ServerCommunicator implements Runnable {
             rq.addArgValue(this.getSSID());
 
             try {
-                this.writeData(rq.getBytes());
-            } catch (IOException e) {
-                this.onConnectionClosed();
+                this.listener.writeData(rq.getBytes());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ConnectionTimeoutException e) {
@@ -306,7 +191,7 @@ public abstract class ServerCommunicator implements Runnable {
         rq.addArgValue(message);
 
         try {
-            this.writeData(rq.getBytes());
+            this.listener.writeData(rq.getBytes());
             this.rwaitings.get(ServerFunction.SendB).acquire(); //Wait for response
             //Response is arrived
             Response rsp = this.responses.put(ServerFunction.SendB, null);
@@ -330,8 +215,6 @@ public abstract class ServerCommunicator implements Runnable {
             }
 
         } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -359,7 +242,7 @@ public abstract class ServerCommunicator implements Runnable {
         rq.addArgValue(message);
 
         try {
-            this.writeData(rq.getBytes());
+            this.listener.writeData(rq.getBytes());
             this.rwaitings.get(ServerFunction.SendA).acquire(); //Wait for response
             //Response is arrived
             Response rsp = this.responses.put(ServerFunction.SendA, null);
@@ -383,8 +266,6 @@ public abstract class ServerCommunicator implements Runnable {
             }
 
         } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -413,7 +294,7 @@ public abstract class ServerCommunicator implements Runnable {
         rq.addArgValue(userId);
 
         try {
-            this.writeData(rq.getBytes());
+            this.listener.writeData(rq.getBytes());
             this.rwaitings.get(ServerFunction.ResolveUser).acquire(); //Wait for response
             //Response is arrived
             Response rsp = this.responses.put(ServerFunction.ResolveUser, null);
@@ -445,6 +326,12 @@ public abstract class ServerCommunicator implements Runnable {
 
         return u;
     }
+
+    public void onNewResponse(ServerFunction fnc, Response rsp) {
+        this.responses.put(fnc, rsp);
+        this.rwaitings.get(fnc).release();
+    }
+
 
     /**
      * Wird bei einer neuen Privatnachricht aufgerufen.
