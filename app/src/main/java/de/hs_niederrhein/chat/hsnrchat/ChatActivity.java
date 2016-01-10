@@ -40,7 +40,7 @@ import de.hs_niederrhein.chat.hsnrchat.types.Message;
 
 public class ChatActivity extends AppCompatActivity {
     private int facID;
-    private long lastUpdate;
+    private int lastUpdate;
     private List<Message> messages = new ArrayList<>();
     private  ArrayAdapter<Message> messageAdapter;
     private DatabaseOpenHelper db = new DatabaseOpenHelper(this);
@@ -93,24 +93,28 @@ public class ChatActivity extends AppCompatActivity {
     public void populateMessages() throws IOException, ClientNotAutheticatedException {
         boolean isRight;
         SQLiteDatabase read = db.getReadableDatabase();
-        String where_clause = db.facNummer + "=" + this.facID;
-        Cursor c = read.query(db.messages, new String[]{db.facNummer, db.message, db.userID}, where_clause,null,null,null,null);
-        while(c.moveToNext()){
-            //Vergleichen ob es der eigene User ist oder nicht
-            if(getUserID() == (long)c.getInt(c.getColumnIndex(db.userID)) ){
-                isRight = true;
-            }
-            else{
-                isRight = false;
-            }
+        String where_clause = db.facNummer + "=" + this.facID + " AND " + db.timeStamp + " > " + this.lastUpdate   ;
+        Cursor c = read.query(db.messages, new String[]{db.facNummer, db.message, db.userID, db.timeStamp}, where_clause,null,null,null, db.timeStamp);
+        if(c.getCount()>0){
+            while(c.moveToNext()){
+                //Vergleichen ob es der eigene User ist oder nicht
+                if(getUserID() == (long)c.getInt(c.getColumnIndex(db.userID)) ){
+                    isRight = true;
+                }
+                else{
+                    isRight = false;
+                }
 
-            messages.add(new Message(
-                    (long)c.getInt(c.getColumnIndex(db.facNummer)),
-                    (long)c.getInt(c.getColumnIndex(db.userID)),
-                    c.getString(c.getColumnIndex(db.message)),
-                    isRight));
+                messages.add(new Message(
+                        (long)c.getInt(c.getColumnIndex(db.facNummer)),
+                        (long)c.getInt(c.getColumnIndex(db.userID)),
+                        c.getString(c.getColumnIndex(db.message)),
+                        isRight));
+                this.lastUpdate = c.getInt(c.getColumnIndex(db.timeStamp));
+            }
         }
-        //this.lastUpdate = c.getLong(c.getColumnIndex(db.timeStamp));
+
+
 
     }
 

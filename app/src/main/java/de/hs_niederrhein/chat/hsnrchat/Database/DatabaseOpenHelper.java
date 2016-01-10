@@ -11,7 +11,7 @@ import de.hs_niederrhein.chat.hsnrchat.R;
  * Created by Jennifer on 05.11.2015.
  */
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "FacDatabase3";
+    private static final String DATABASE_NAME = "FacDatabase6";
     private static final int DATABASE_VERSION = 1;
 
     public String faculties = "faculties";
@@ -36,9 +36,9 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
                 facIcon+ " INTEGER);");
         db.execSQL("CREATE TABLE "+ messages + "(" +
                 facNummer+ " INTEGER," +
-                message+ " TEXT PRIMARY KEY, "+
+                message+ " TEXT, "+
                 userID+ " INTEGER, " +
-                timeStamp + "TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL );");
+                timeStamp + " INTEGER PRIMARY KEY AUTOINCREMENT );");
 
         insertFaculties();
 
