@@ -73,6 +73,7 @@ public class ClientServerCommunciator extends ServerCommunicator {
     @Override //Für Chaträume
     public void onNewMessage(long userId, short roomId, String message) {
         db.insertMessage(roomId,message,(int)userId);
+
     }
 
     @Override

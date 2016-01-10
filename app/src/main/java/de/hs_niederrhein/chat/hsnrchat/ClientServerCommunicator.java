@@ -1,5 +1,6 @@
 package de.hs_niederrhein.chat.hsnrchat;
 
+import android.app.Activity;
 import android.content.Context;
 
 import java.io.IOException;
@@ -29,6 +30,8 @@ public class ClientServerCommunicator extends ServerCommunicator {
         }
         return ClientServerCommunicator.obj;
     }
+
+
 
     private ClientServerCommunicator(Context context, String host, int port) throws UnknownHostException, IOException {
         super(host, port);
@@ -78,6 +81,7 @@ public class ClientServerCommunicator extends ServerCommunicator {
     @Override
     public void onNewMessage(long userId, short roomId, String message) {
         db.insertMessage((int)roomId, message, (int)userId);
+
     }
 
     @Override
