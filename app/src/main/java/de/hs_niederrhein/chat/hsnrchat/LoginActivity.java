@@ -27,13 +27,17 @@ public class LoginActivity extends AppCompatActivity {
     private String _username;
     private String _password;
 
-    CommunicatorExample com;
+    ClientServerCommunicator com;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        // ClientServerCommunciator.connect(this,"0.0.0.0",1337); //Richtige IP ergänzen
+        try {
+            this.com = ClientServerCommunicator.get(this);
+        } catch (IOException e) {
+            Log.e("Error", "Verbindung konnte nicht hergestellt werden");
+        }
         Button bt_login = (Button)findViewById(R.id.bt_login);
         bt_login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,11 +47,6 @@ public class LoginActivity extends AppCompatActivity {
         });
 
 
-        try {
-            com = new CommunicatorExample("192.168.2.107", 1337);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
     }
 
