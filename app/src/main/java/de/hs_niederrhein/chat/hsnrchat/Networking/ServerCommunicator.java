@@ -160,7 +160,7 @@ public abstract class ServerCommunicator {
     /**
      * Gibt die aktuelle Session Id zurück. (Erst nach der Authetifizierung aufrufbar.)
      * @return Aktuelle SSID
-     * @throws InvalidSSIDException
+     * @throws ClientNotAutheticatedException
      */
     public long getSSID() throws ClientNotAutheticatedException {
         if(this.ssid == 0)
@@ -169,6 +169,11 @@ public abstract class ServerCommunicator {
         return this.ssid;
     }
 
+    /**
+     * Gibt die User Id des aktuell am Gerät angemeldeten Benutzers zurück. (Erst nach der Authetifizierung aufrufbar.)
+     * @return Aktuelle UserId
+     * @throws ClientNotAutheticatedException
+     */
     public long getUserId() throws ClientNotAutheticatedException {
         if(this.userId == 0)
             throw new ClientNotAutheticatedException();
