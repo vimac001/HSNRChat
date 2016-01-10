@@ -47,13 +47,22 @@ public class Response {
         if(this.status == ResponseStatus.Success) {
             switch (this.fnc) {
                 case Login:
-                    this.os.writeLong(this.gis.readLong()); //Store SSID
-                    this.os.writeLong(this.gis.readLong());
+                    long ssid = this.gis.readLong();
+                    long usid = this.gis.readLong();
+
+                    this.os.writeLong(usid);
+                    this.os.writeLong(ssid);
                     break;
+
+
                 case ResolveUser:
-                    this.os.writeLong(this.gis.readLong());
-                    this.os.writeUTF(this.gis.readUTF());
-                    this.os.writeUTF(this.gis.readUTF());
+                    long uid = this.gis.readLong();
+                    String uname = this.gis.readUTF();
+                    String unick = this.gis.readUTF();
+
+                    this.os.writeUTF(unick);
+                    this.os.writeUTF(uname);
+                    this.os.writeLong(uid);
                     break;
             }
         }
