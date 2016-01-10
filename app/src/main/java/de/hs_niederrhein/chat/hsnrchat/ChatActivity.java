@@ -95,7 +95,7 @@ public class ChatActivity extends AppCompatActivity {
         SQLiteDatabase read = db.getReadableDatabase();
         String where_clause = db.facNummer + "=" + this.facID + " AND " + db.timeStamp + " > " + this.lastUpdate   ;
         Cursor c = read.query(db.messages, new String[]{db.facNummer, db.message, db.userID, db.timeStamp}, where_clause,null,null,null, db.timeStamp);
-        if(c.getCount()>0){
+        if(c.getCount() > 0){
             while(c.moveToNext()){
                 //Vergleichen ob es der eigene User ist oder nicht
                 if(getUserID() == (long)c.getInt(c.getColumnIndex(db.userID)) ){
