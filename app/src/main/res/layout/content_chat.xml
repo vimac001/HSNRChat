@@ -33,7 +33,7 @@
             android:ems="15"
             android:background="@drawable/oval"
             android:textSize="20sp"
-            android:text="Hier Text einfügen"
+            android:hint="Text"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"

@@ -34,6 +34,7 @@
         android:layout_centerHorizontal="true"
         android:background="@drawable/oval"
         android:textSize="20sp"
+        android:hint="Username"
         />
 
     <EditText
@@ -46,6 +47,7 @@
         android:layout_centerHorizontal="true"
         android:background="@drawable/oval"
         android:textSize="20sp"
+        android:hint="Password"
         />
 
     <Button
