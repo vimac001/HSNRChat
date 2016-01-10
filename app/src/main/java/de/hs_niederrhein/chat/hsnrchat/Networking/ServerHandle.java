@@ -22,8 +22,6 @@ public class ServerHandle implements Runnable {
     public static int ResponseWaitingTime = 15;
 
     protected ServerCommunicator com;
-    protected ServerWriter writer;
-    protected Thread tWriter;
 
     protected InetAddress addr;
     protected int port;
@@ -43,18 +41,10 @@ public class ServerHandle implements Runnable {
     public ServerHandle(ServerCommunicator com) {
         this.com = com;
         this.port = com.getPort();
-
-        this.writer = new ServerWriter(this);
-        this.tWriter = new Thread(this.writer);
     }
 
     public boolean isConnected() {
         return this.client.isConnected();
-    }
-
-    public void sendData(byte[] data) throws IOException {
-        this.os.write(data);
-        this.os.flush();
     }
 
     public void writeData(byte[] data) throws InterruptedException, ConnectionTimeoutException {
@@ -67,7 +57,12 @@ public class ServerHandle implements Runnable {
             else
                 this.writing.acquire();
 
-        this.writer.write(data);
+        try {
+            this.os.write(data);
+            this.os.flush();
+        } catch (IOException e) {
+            this.onConnectionClosed();
+        }
 
         this.writing.release();
     }
@@ -86,8 +81,6 @@ public class ServerHandle implements Runnable {
 
                     this.is = new StructuredInputStream(this.in);
                     this.os = new StructuredOutputStream(this.out);
-
-                    this.tWriter.start();
 
                     this.writing.release();
                 }
