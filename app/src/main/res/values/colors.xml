@@ -4,5 +4,5 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorChat">#A30000</color>
-    <color name="colorHSNR">"#014493"</color>
+    <color name="colorHsnr">#014493</color>
 </resources>
