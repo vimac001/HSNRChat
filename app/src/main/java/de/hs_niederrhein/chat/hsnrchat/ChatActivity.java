@@ -22,6 +22,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.security.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ClientNotAutheticate
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ConnectionTimeoutException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.InvalidResponseStatusException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.InvalidSSIDException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.RoomNotFoundException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ServerErrorException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.UserNotFoundException;
 import de.hs_niederrhein.chat.hsnrchat.types.Faculty;
@@ -38,6 +40,7 @@ import de.hs_niederrhein.chat.hsnrchat.types.Message;
 
 public class ChatActivity extends AppCompatActivity {
     private int facID;
+    private long lastUpdate;
     private List<Message> messages = new ArrayList<>();
     private  ArrayAdapter<Message> messageAdapter;
     private DatabaseOpenHelper db = new DatabaseOpenHelper(this);
@@ -47,13 +50,33 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        this.lastUpdate = 0;
+        //Thread starten um neue Nachrichten zu überwachen
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!Thread.currentThread().isInterrupted()){
+                    try {
+                        populateMessages();
+                        Thread.sleep(1000,0);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ClientNotAutheticatedException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
 
+            }
+        });
+        t.start();
         Intent intent = getIntent();
         if(intent.hasExtra("facID")){
             this.facID = intent.getIntExtra("facID",0);
         }
 
-        populateMessages();
+
         populateMessageListView();
         registerClick();
 
@@ -61,17 +84,33 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-    public void populateMessages(){
+
+
+    private long getUserID() throws IOException, ClientNotAutheticatedException {
+        return ClientServerCommunicator.get(this).getUserId();
+    }
+
+    public void populateMessages() throws IOException, ClientNotAutheticatedException {
+        boolean isRight;
         SQLiteDatabase read = db.getReadableDatabase();
         String where_clause = db.facNummer + "=" + this.facID;
         Cursor c = read.query(db.messages, new String[]{db.facNummer, db.message, db.userID}, where_clause,null,null,null,null);
         while(c.moveToNext()){
+            //Vergleichen ob es der eigene User ist oder nicht
+            if(getUserID() == (long)c.getInt(c.getColumnIndex(db.userID)) ){
+                isRight = true;
+            }
+            else{
+                isRight = false;
+            }
+
             messages.add(new Message(
                     (long)c.getInt(c.getColumnIndex(db.facNummer)),
                     (long)c.getInt(c.getColumnIndex(db.userID)),
                     c.getString(c.getColumnIndex(db.message)),
-                    false)); //Hier noch vergleichen ob es der eigene User ist oder nicht !!
+                    isRight));
         }
+        //this.lastUpdate = c.getLong(c.getColumnIndex(db.timeStamp));
 
     }
 
@@ -94,21 +133,22 @@ public class ChatActivity extends AppCompatActivity {
                         sendMessageToServer(editText.getText().toString());
                     } catch (IOException e) {
                         e.printStackTrace();
-                    } catch (ConnectionTimeoutException e) {
+                    } catch (ClientErrorException e) {
                         e.printStackTrace();
                     } catch (InvalidSSIDException e) {
-                        e.printStackTrace();
-                    } catch (ClientNotAutheticatedException e) {
                         e.printStackTrace();
                     } catch (InvalidResponseStatusException e) {
                         e.printStackTrace();
                     } catch (ServerErrorException e) {
                         e.printStackTrace();
-                    } catch (UserNotFoundException e) {
+                    } catch (ConnectionTimeoutException e) {
                         e.printStackTrace();
-                    } catch (ClientErrorException e) {
+                    } catch (RoomNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (ClientNotAutheticatedException e) {
                         e.printStackTrace();
                     }
+
 
                     //Editfeld leeren
                     editText.setText("");
@@ -125,8 +165,8 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    public void sendMessageToServer(String message) throws IOException, ConnectionTimeoutException, InvalidSSIDException, ClientNotAutheticatedException, InvalidResponseStatusException, ServerErrorException, UserNotFoundException, ClientErrorException {
-        ClientServerCommunicator.get(this).sendMessage(this.facID,message);
+    public void sendMessageToServer(String message) throws IOException, ClientErrorException, InvalidSSIDException, InvalidResponseStatusException, ServerErrorException, ConnectionTimeoutException, RoomNotFoundException, ClientNotAutheticatedException {
+        ClientServerCommunicator.get(this).sendMessage((short) this.facID, message);
     }
 
     public static void hideKeyboard(Activity activity) {
