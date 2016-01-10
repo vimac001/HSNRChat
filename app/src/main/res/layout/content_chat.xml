@@ -16,6 +16,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/chat_listview"
         android:layout_above="@+id/chat_btsend"
+        android:divider="@color/white"
+        android:background="@color/white"
    />
 
     <RelativeLayout
