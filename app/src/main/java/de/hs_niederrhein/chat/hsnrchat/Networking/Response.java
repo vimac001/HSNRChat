@@ -48,6 +48,12 @@ public class Response {
             switch (this.fnc) {
                 case Login:
                     this.os.writeLong(this.gis.readLong()); //Store SSID
+                    this.os.writeLong(this.gis.readLong());
+                    break;
+                case ResolveUser:
+                    this.os.writeLong(this.gis.readLong());
+                    this.os.writeUTF(this.gis.readUTF());
+                    this.os.writeUTF(this.gis.readUTF());
                     break;
             }
         }
