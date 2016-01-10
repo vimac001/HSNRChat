@@ -31,7 +31,10 @@
         android:id="@+id/input_username"
         android:layout_marginTop="74dp"
         android:layout_below="@+id/login_"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/oval"
+        android:textSize="20sp"
+        />
 
     <EditText
         android:layout_width="wrap_content"
@@ -40,7 +43,10 @@
         android:ems="10"
         android:id="@+id/input_password"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/oval"
+        android:textSize="20sp"
+        />
 
     <Button
         android:layout_width="wrap_content"
