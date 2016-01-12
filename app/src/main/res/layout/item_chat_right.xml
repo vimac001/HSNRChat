@@ -12,8 +12,8 @@
         android:background="@drawable/bubble_a"
         android:paddingLeft="10dip"
         android:id="@+id/id_text"
-        android:textSize="15dp"
+        android:textSize="18dp"
         android:textAlignment="0"
-        android:textColor="@color/colorChat"
+        android:textColor="@color/colorChatRight"
         android:layout_gravity="right" />
 </LinearLayout>

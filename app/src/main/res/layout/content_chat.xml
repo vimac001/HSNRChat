@@ -30,7 +30,8 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_toLeftOf="@id/chat_btsend"/>
+        android:layout_toLeftOf="@id/chat_btsend"
+        android:layout_marginBottom="3dp"/>
 
     <Button
         android:layout_width="wrap_content"

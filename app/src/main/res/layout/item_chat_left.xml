@@ -14,7 +14,7 @@
         android:paddingLeft="10dip"
         android:text="chat left"
         android:id="@+id/id_text"
-        android:textSize="15dp"
-        android:textColor="@color/colorChat"
+        android:textSize="18dp"
+        android:textColor="@color/colorChatLeft"
         android:layout_gravity="left" />
 </LinearLayout>
