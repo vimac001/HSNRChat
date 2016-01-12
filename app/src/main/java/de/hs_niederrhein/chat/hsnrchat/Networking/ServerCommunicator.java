@@ -38,6 +38,7 @@ public abstract class ServerCommunicator {
 
     private Map<ServerFunction, Response> responses;
     private Map<ServerFunction, Semaphore> rwaitings;
+    private Map<Long, User> users;
 
     private long ssid = 0;
     private long userId = 0;
@@ -56,6 +57,8 @@ public abstract class ServerCommunicator {
 
         this.responses = new TreeMap<>();
         this.rwaitings = new TreeMap<>();
+        this.users = new TreeMap<>();
+
         for(ServerFunction fnc : ServerFunction.values()) {
             this.rwaitings.put(fnc, new Semaphore(0));
         }
@@ -296,6 +299,9 @@ public abstract class ServerCommunicator {
      * @throws InvalidResponseStatusException
      */
     public User resolveUser(long userId) throws ServerErrorException, InvalidSSIDException, UserNotFoundException, ClientNotAutheticatedException, ClientErrorException, ConnectionTimeoutException, InvalidResponseStatusException {
+        if(this.users.containsKey(userId))
+            return this.users.get(userId);
+
         if(!this.isAuthenticated()) {
             throw new ClientNotAutheticatedException();
         }
@@ -317,7 +323,7 @@ public abstract class ServerCommunicator {
             switch (rsp.getStatus()) {
                 case Success:
                     u = new User(rsp);
-
+                    this.users.put(u.getId(), u);
                 case UserNotFound:
                     throw new UserNotFoundException();
 

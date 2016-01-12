@@ -31,6 +31,9 @@ public class ClientServerCommunicator extends ServerCommunicator {
         return ClientServerCommunicator.obj;
     }
 
+    public static ClientServerCommunicator get() throws IOException {
+        return ClientServerCommunicator.obj;
+    }
 
 
     private ClientServerCommunicator(Context context, String host, int port) throws UnknownHostException, IOException {
@@ -80,8 +83,7 @@ public class ClientServerCommunicator extends ServerCommunicator {
 
     @Override
     public void onNewMessage(long userId, short roomId, String message) {
-        db.insertMessage((int)roomId, message, (int)userId);
-
+        db.insertMessage((int)(roomId & 0xffff), message, userId);
     }
 
     @Override
