@@ -1,5 +1,6 @@
 package de.hs_niederrhein.chat.hsnrchat;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -23,6 +24,7 @@ import de.hs_niederrhein.chat.hsnrchat.types.Faculty;
 public class MainActivity extends AppCompatActivity {
     private DatabaseOpenHelper db = new DatabaseOpenHelper(this);
     private List<Faculty> facData = new ArrayList<>();
+    private static List<Activity> _activities;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,27 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public static void register(Activity activity) {
+        if(_activities == null) {
+            _activities = new ArrayList<Activity>();
+        }
+        _activities.add(activity);
+    }
+
+    public static void finishAll() {
+        for (Activity activity : _activities) {
+            activity.finish();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        db.deleteContentOfMessageCache();
+        this.finishAll();
+        this.finish();
+
+    }
     private void startChatActivity(int position) {
         System.out.println("Position:" + position);
         Intent changeToChatView = new Intent(this, ChatActivity.class);

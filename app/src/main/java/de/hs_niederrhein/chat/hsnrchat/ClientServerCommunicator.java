@@ -80,7 +80,8 @@ public class ClientServerCommunicator extends ServerCommunicator {
 
     @Override
     public void onNewMessage(long userId, short roomId, String message) {
-        db.insertMessage((int)roomId, message, (int)userId);
+        db.insertMessage((int)roomId, message, userId);
+
 
     }
 

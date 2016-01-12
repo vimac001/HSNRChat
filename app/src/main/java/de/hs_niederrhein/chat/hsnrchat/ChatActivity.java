@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -35,6 +36,7 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.InvalidSSIDException
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.RoomNotFoundException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ServerErrorException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.UserNotFoundException;
+import de.hs_niederrhein.chat.hsnrchat.Networking.User;
 import de.hs_niederrhein.chat.hsnrchat.types.Faculty;
 import de.hs_niederrhein.chat.hsnrchat.types.Message;
 
@@ -49,6 +51,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MainActivity.register(this);
         setContentView(R.layout.activity_chat);
         this.lastUpdate = 0;
         //Thread starten um neue Nachrichten zu überwachen
@@ -75,6 +78,8 @@ public class ChatActivity extends AppCompatActivity {
         if(intent.hasExtra("facID")){
             this.facID = intent.getIntExtra("facID",0);
         }
+        ListView listView = (ListView) findViewById(R.id.chat_listview);
+        listView.smoothScrollToPosition(messages.size());
 
 
         populateMessageListView();
@@ -98,7 +103,7 @@ public class ChatActivity extends AppCompatActivity {
         if(c.getCount() > 0){
             while(c.moveToNext()){
                 //Vergleichen ob es der eigene User ist oder nicht
-                if(getUserID() == (long)c.getInt(c.getColumnIndex(db.userID)) ){
+                if(getUserID() == c.getLong(c.getColumnIndex(db.userID)) ){
                     isRight = true;
                 }
                 else{
