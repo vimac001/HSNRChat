@@ -22,8 +22,8 @@
     <string name="fac">Fakultäten</string>
     <string name="location">Standorte</string>
     <string name="campus_krefeld_sued">Krefeld Süd</string>
-    <string name="campus_krefeld_west">Campus Krefeld West</string>
-    <string name="campus_moenchengladbach">Mönchengladbach</string>
+    <string name="campus_krefeld_west">Krefeld West</string>
+    <string name="campus_moenchengladbach">MG</string>
     <string name="logout">Abmelden</string>
 
 </resources>
