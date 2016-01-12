@@ -10,6 +10,9 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -53,6 +56,9 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         MainActivity.register(this);
         setContentView(R.layout.activity_chat);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         this.lastUpdate = 0;
         //Thread starten um neue Nachrichten zu überwachen
         Thread t = new Thread(new Runnable() {
@@ -89,7 +95,44 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch(item.getItemId()){
+            case R.id.fac:
+                changeToMainActivity();
+                return true;
+            case R.id.location:
+                changeToLocationActivity();
+                return true;
+            case R.id.logout:
+                logout();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void logout(){
+        DatabaseOpenHelper db = new DatabaseOpenHelper(this);
+        db.deleteContentOfMessageCache();
+        MainActivity.finishAll();
+    }
+
+    private void changeToMainActivity(){
+        Intent changeToMainActivity = new Intent(this, MainActivity.class);
+        startActivity(changeToMainActivity);
+    }
+    private void changeToLocationActivity(){
+        Intent changeToLocationActivity = new Intent(this, LocationActivity.class);
+        startActivity(changeToLocationActivity);
+    }
 
     private long getUserID() throws IOException, ClientNotAutheticatedException {
         return ClientServerCommunicator.get(this).getUserId();
@@ -209,7 +252,7 @@ public class ChatActivity extends AppCompatActivity {
             else
                 itemView = getLayoutInflater().inflate(R.layout.item_chat_left,parent,false);
 
-            /*User currentUser = null;
+            User currentUser = null;
             try {
                 currentUser = ClientServerCommunicator.get().resolveUser(currentMessage.getUserID());
             } catch (ServerErrorException e) {
@@ -231,9 +274,9 @@ public class ChatActivity extends AppCompatActivity {
             }
 
             String textToShow = currentUser.getUsername() + ": " + currentMessage.getMessage();
-            */
+
             TextView textLayout = (TextView) itemView.findViewById(R.id.id_text);
-            textLayout.setText(currentMessage.getMessage());
+            textLayout.setText(textToShow);
 
             return itemView;
         }

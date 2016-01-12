@@ -18,5 +18,12 @@
     <string name="title_activity_login">login</string>
     <string name="title_main">Fakultäten</string>
     <string name="senden">send</string>
+    <string name="title_activity_location">location</string>
+    <string name="fac">Fakultäten</string>
+    <string name="location">Standorte</string>
+    <string name="campus_krefeld_sued">Krefeld Süd</string>
+    <string name="campus_krefeld_west">Campus Krefeld West</string>
+    <string name="campus_moenchengladbach">Mönchengladbach</string>
+    <string name="logout">Abmelden</string>
 
 </resources>

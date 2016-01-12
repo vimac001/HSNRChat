@@ -6,6 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -31,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         db.insertFaculties();
 
         populateFACData();
@@ -38,8 +45,32 @@ public class MainActivity extends AppCompatActivity {
         registerClick();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch(item.getItemId()){
+            case R.id.fac:
+                //
+                return true;
+            case R.id.location:
+                changeToLocationActivity();
+                return true;
+            case R.id.logout:
+                logout();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void registerClick() {
-        ListView facList = (ListView)findViewById(R.id.listView_main);
+        ListView facList = (ListView) findViewById(R.id.listView_main);
         facList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -47,6 +78,11 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void changeToLocationActivity(){
+        Intent changeToLocationActivity = new Intent(this,LocationActivity.class);
+        startActivity(changeToLocationActivity);
     }
 
     public static void register(Activity activity) {
@@ -62,6 +98,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void logout(){
+        db.deleteContentOfMessageCache();
+        this.finishAll();
+        this.finish();
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -69,6 +111,12 @@ public class MainActivity extends AppCompatActivity {
         this.finishAll();
         this.finish();
 
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        db.deleteContentOfMessageCache();
     }
     private void startChatActivity(int position) {
         System.out.println("Position:" + position);
