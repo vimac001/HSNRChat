@@ -112,7 +112,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 messages.add(new Message(
                         (long)c.getInt(c.getColumnIndex(db.facNummer)),
-                        (long)c.getInt(c.getColumnIndex(db.userID)),
+                        (long)c.getLong(c.getColumnIndex(db.userID)),
                         c.getString(c.getColumnIndex(db.message)),
                         isRight));
                 this.lastUpdate = c.getInt(c.getColumnIndex(db.timeStamp));
@@ -209,6 +209,29 @@ public class ChatActivity extends AppCompatActivity {
             else
                 itemView = getLayoutInflater().inflate(R.layout.item_chat_left,parent,false);
 
+            /*User currentUser = null;
+            try {
+                currentUser = ClientServerCommunicator.get().resolveUser(currentMessage.getUserID());
+            } catch (ServerErrorException e) {
+                e.printStackTrace();
+            } catch (InvalidSSIDException e) {
+                e.printStackTrace();
+            } catch (UserNotFoundException e) {
+                e.printStackTrace();
+            } catch (ClientNotAutheticatedException e) {
+                e.printStackTrace();
+            } catch (ClientErrorException e) {
+                e.printStackTrace();
+            } catch (ConnectionTimeoutException e) {
+                e.printStackTrace();
+            } catch (InvalidResponseStatusException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            String textToShow = currentUser.getUsername() + ": " + currentMessage.getMessage();
+            */
             TextView textLayout = (TextView) itemView.findViewById(R.id.id_text);
             textLayout.setText(currentMessage.getMessage());
 

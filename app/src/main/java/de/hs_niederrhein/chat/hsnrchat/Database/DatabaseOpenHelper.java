@@ -11,7 +11,7 @@ import de.hs_niederrhein.chat.hsnrchat.R;
  * Created by Jennifer on 05.11.2015.
  */
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "FacDatabase8";
+    private static final String DATABASE_NAME = "FacDatabase9";
     private static final int DATABASE_VERSION = 1;
 
     public String faculties = "faculties";
