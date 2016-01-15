@@ -13,13 +13,14 @@ import android.view.View;
 import android.widget.Button;
 
 import de.hs_niederrhein.chat.hsnrchat.Database.DatabaseOpenHelper;
+import de.hs_niederrhein.chat.hsnrchat.types.Finisher;
 
 public class LocationActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MainActivity.register(this);
+        Finisher.register(this);
         setContentView(R.layout.activity_location);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -45,7 +46,7 @@ public class LocationActivity extends AppCompatActivity {
 
                 return true;
             case R.id.logout:
-                logout();
+                Finisher.finishApp();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -88,10 +89,6 @@ public class LocationActivity extends AppCompatActivity {
         startActivity(changeToChatView);
     }
 
-    public void logout(){
-        DatabaseOpenHelper db = new DatabaseOpenHelper(this);
-        db.deleteContentOfMessageCache();
-        MainActivity.finishAll();
-    }
+
 
 }

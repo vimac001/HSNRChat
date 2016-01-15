@@ -22,6 +22,7 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.InvalidResponseStatu
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ServerErrorException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.UserNotFoundException;
 import de.hs_niederrhein.chat.hsnrchat.types.ClientServerCommunciator;
+import de.hs_niederrhein.chat.hsnrchat.types.Finisher;
 
 public class LoginActivity extends AppCompatActivity {
     private String _username;
@@ -33,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        MainActivity.register(this);
+        Finisher.register(this);
         try {
             this.com = ClientServerCommunicator.get(this);
         } catch (IOException e) {

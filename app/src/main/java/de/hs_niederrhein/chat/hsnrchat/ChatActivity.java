@@ -41,6 +41,7 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.ServerErrorException
 import de.hs_niederrhein.chat.hsnrchat.Networking.Exception.UserNotFoundException;
 import de.hs_niederrhein.chat.hsnrchat.Networking.User;
 import de.hs_niederrhein.chat.hsnrchat.types.Faculty;
+import de.hs_niederrhein.chat.hsnrchat.types.Finisher;
 import de.hs_niederrhein.chat.hsnrchat.types.Message;
 
 public class ChatActivity extends AppCompatActivity {
@@ -54,7 +55,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MainActivity.register(this);
+        Finisher.register(this);
         setContentView(R.layout.activity_chat);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -112,18 +113,13 @@ public class ChatActivity extends AppCompatActivity {
                 changeToLocationActivity();
                 return true;
             case R.id.logout:
-                logout();
+                Finisher.finishApp();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    public void logout(){
-        DatabaseOpenHelper db = new DatabaseOpenHelper(this);
-        db.deleteContentOfMessageCache();
-        MainActivity.finishAll();
-    }
 
     private void changeToMainActivity(){
         Intent changeToMainActivity = new Intent(this, MainActivity.class);

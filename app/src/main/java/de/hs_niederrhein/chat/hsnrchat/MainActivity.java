@@ -24,6 +24,7 @@ import java.util.List;
 import de.hs_niederrhein.chat.hsnrchat.Database.DatabaseOpenHelper;
 //import de.hs_niederrhein.chat.hsnrchat.Networking.Talker;
 import de.hs_niederrhein.chat.hsnrchat.types.Faculty;
+import de.hs_niederrhein.chat.hsnrchat.types.Finisher;
 
 public class MainActivity extends AppCompatActivity {
     private DatabaseOpenHelper db = new DatabaseOpenHelper(this);
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Finisher.register(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 changeToLocationActivity();
                 return true;
             case R.id.logout:
-                logout();
+                Finisher.finishApp();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -85,31 +86,16 @@ public class MainActivity extends AppCompatActivity {
         startActivity(changeToLocationActivity);
     }
 
-    public static void register(Activity activity) {
-        if(_activities == null) {
-            _activities = new ArrayList<Activity>();
-        }
-        _activities.add(activity);
-    }
 
-    public static void finishAll() {
-        for (Activity activity : _activities) {
-            activity.finish();
-        }
-    }
 
-    public void logout(){
-        db.deleteContentOfMessageCache();
-        this.finishAll();
-        this.finish();
-    }
+
+
+
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        db.deleteContentOfMessageCache();
-        this.finishAll();
-        this.finish();
+        Finisher.finishApp();
 
     }
 
@@ -118,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         db.deleteContentOfMessageCache();
     }
+
     private void startChatActivity(int position) {
         System.out.println("Position:" + position);
         Intent changeToChatView = new Intent(this, ChatActivity.class);
