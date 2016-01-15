@@ -3,7 +3,7 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="colorChatRight">#808080</color>
+    <color name="colorChatRight">#0a0a0a</color>
     <color name="colorChatLeft">#000000</color>
     <color name="colorHsnr">#014493</color>
     <color name="white">#FFFFFF</color>
