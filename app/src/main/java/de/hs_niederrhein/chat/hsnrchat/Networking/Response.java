@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 import de.hs_niederrhein.chat.hsnrchat.Networking.Streaming.StructuredInputStream;
@@ -14,6 +16,7 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Streaming.StructuredOutputStre
 
 public class Response {
 
+    private Deque<String> strData = new ArrayDeque<>();
     private List<Byte> data = new ArrayList<>();
     private OutputStream out = new OutputStream() {
         @Override
@@ -60,8 +63,9 @@ public class Response {
                     String uname = this.gis.readUTF();
                     String unick = this.gis.readUTF();
 
-                    this.os.writeUTF(unick);
-                    this.os.writeUTF(uname);
+                    this.strData.push(unick);
+                    this.strData.push(uname);
+
                     this.os.writeLong(uid);
                     break;
             }
@@ -127,6 +131,6 @@ public class Response {
     }
 
     public String pullString() throws IOException {
-        return this.is.readUTF();
+        return this.strData.pop();
     }
 }

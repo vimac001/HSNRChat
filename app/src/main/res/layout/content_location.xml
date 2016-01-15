@@ -8,7 +8,8 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/activity_location"
-    tools:context="de.hs_niederrhein.chat.hsnrchat.LocationActivity">
+    tools:context="de.hs_niederrhein.chat.hsnrchat.LocationActivity"
+    android:background="@color/white">
 
     <Button
         android:layout_width="wrap_content"
@@ -17,7 +18,11 @@
         android:id="@+id/btKRS"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="90dp" />
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/locationbtn"
+        android:textColor="@color/white"
+        android:textSize="20dp"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -25,7 +30,11 @@
         android:text="@string/campus_krefeld_west"
         android:id="@+id/btKRW"
         android:layout_below="@+id/btKRS"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/locationbtn"
+        android:textColor="@color/white"
+        android:textSize="20dp"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -33,5 +42,8 @@
         android:text="@string/campus_moenchengladbach"
         android:id="@+id/btMG"
         android:layout_below="@+id/btKRW"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/locationbtn"
+        android:textColor="@color/white"
+        android:textSize="20dp"/>
 </RelativeLayout>

@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
 
-    <corners
-        android:radius="21dp"
-        />
     <gradient
         android:angle="45"
         android:centerX="35%"
@@ -11,16 +8,18 @@
         android:startColor="@color/colorHsnr"
         android:endColor="@color/colorHsnr"
         android:type="linear"
+
         />
     <size
-        android:width="220dp"
-        android:height="120dp"
+        android:width="72px"
+        android:height="72px"
+
         />
     <stroke
-        android:width="2dp"
+        android:width="1px"
         android:color="#878787"
-        />
 
+        />
 
 
 </shape>

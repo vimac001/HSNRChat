@@ -27,7 +27,7 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Streaming.StructuredOutputStre
 
 public abstract class ServerCommunicator {
 
-    public static final String DefaultHost = "viktor-machnik.eu";
+    public static final String DefaultHost = "viktor-machnik.eu";//"192.168.2.128";
     public static final int DefaultPort = 1338;
 
     private String host;
@@ -324,6 +324,7 @@ public abstract class ServerCommunicator {
                 case Success:
                     u = new User(rsp);
                     this.users.put(u.getId(), u);
+                    break;
                 case UserNotFound:
                     throw new UserNotFoundException();
 
