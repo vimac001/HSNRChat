@@ -273,7 +273,7 @@ public class ChatActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            String textToShow = currentUser.getUsername() + ": " + currentMessage.getMessage();
+            String textToShow = currentUser.getDisplayName() + ": " + currentMessage.getMessage();
 
             TextView textLayout = (TextView) itemView.findViewById(R.id.id_text);
             textLayout.setText(textToShow);
