@@ -27,7 +27,7 @@ import de.hs_niederrhein.chat.hsnrchat.Networking.Streaming.StructuredOutputStre
 
 public abstract class ServerCommunicator {
 
-    public static final String DefaultHost = "viktor-machnik.eu";//"192.168.2.128";
+    public static final String DefaultHost = "studwow.eu";//"192.168.2.128";
     public static final int DefaultPort = 1338;
 
     private String host;
